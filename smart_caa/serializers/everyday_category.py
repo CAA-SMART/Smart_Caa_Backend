@@ -18,6 +18,7 @@ class EverydayCategorySerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
+            'is_active',
             'created_by',
             'created_by_username',
             'created_at',
@@ -27,6 +28,9 @@ class EverydayCategorySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'name': {
                 'help_text': 'Nome da categoria do cotidiano'
+            },
+            'is_active': {
+                'help_text': 'Indica se a categoria está ativa'
             },
             'id': {
                 'help_text': 'ID único da categoria'

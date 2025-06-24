@@ -1,1 +1,2 @@
 from .everyday_category import EverydayCategoryCreateListView, EverydayCategoryRetrieveUpdateDestroyView
+from .pictogram import PictogramCreateListView, PictogramRetrieveUpdateDestroyView

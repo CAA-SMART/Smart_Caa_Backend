@@ -23,6 +23,12 @@ class BaseModel(models.Model):
         verbose_name="Data de atualização"
     )
     
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Ativo",
+        help_text="Indica se o registro está ativo no sistema"
+    )
+    
     class Meta:
         abstract = True
         ordering = ['-created_at']
