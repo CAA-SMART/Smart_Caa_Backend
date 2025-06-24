@@ -1,0 +1,61 @@
+@baseUrl = http://localhost:8000
+
+###
+# @name listarCategorias
+GET {{baseUrl}}/api/everyday-categories/
+Content-Type: application/json
+
+###
+# @name criarCategoria
+POST {{baseUrl}}/api/everyday-categories/
+Content-Type: application/json
+
+{
+    "name": "Alimentação"
+}
+
+###
+# @name obterCategoria
+GET {{baseUrl}}/api/everyday-categories/1/
+Content-Type: application/json
+
+###
+# @name atualizarCategoria
+PUT {{baseUrl}}/api/everyday-categories/1/
+Content-Type: application/json
+
+{
+    "name": "Cuidados Pessoais"
+}
+
+###
+# @name atualizarParcialCategoria
+PATCH {{baseUrl}}/api/everyday-categories/1/
+Content-Type: application/json
+
+{
+    "name": "Lazer e Entretenimento"
+}
+
+###
+# @name deletarCategoria
+DELETE {{baseUrl}}/api/everyday-categories/1/
+Content-Type: application/json
+
+###
+# @name criarCategoriaCasa
+POST {{baseUrl}}/api/everyday-categories/
+Content-Type: application/json
+
+{
+    "name": "Casa e Ambiente"
+}
+
+###
+# @name criarCategoriaTransporte
+POST {{baseUrl}}/api/everyday-categories/
+Content-Type: application/json
+
+{
+    "name": "Transporte"
+}
