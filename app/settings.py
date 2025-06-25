@@ -224,8 +224,8 @@ SPECTACULAR_SETTINGS = {
         {
             'url': 'http://localhost:8000',
             'description': 'Desenvolvimento'
-        }
-    ],    'TAGS': [
+        }    ],
+    'TAGS': [
         {
             'name': 'EverydayCategory',
             'description': 'Operações relacionadas às categorias do cotidiano'
@@ -233,6 +233,14 @@ SPECTACULAR_SETTINGS = {
         {
             'name': 'Pictogram',
             'description': 'Operações relacionadas aos pictogramas'
+        },
+        {
+            'name': 'Patient',
+            'description': 'Operações relacionadas aos pacientes'
+        },
+        {
+            'name': 'Caregiver',
+            'description': 'Operações relacionadas aos cuidadores'
         }
     ]
 }

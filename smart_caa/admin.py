@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EverydayCategory, Pictogram
+from .models import EverydayCategory, Pictogram, Person
 
 
 class PictogramInline(admin.TabularInline):
@@ -53,3 +53,55 @@ class PictogramAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         """Otimiza as consultas incluindo a categoria relacionada"""
         return super().get_queryset(request).select_related('category', 'created_by')
+
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    list_display = ['name', 'cpf', 'get_person_types', 'email', 'phone', 'is_active', 'created_at']
+    search_fields = ['name', 'cpf', 'email', 'phone']
+    list_filter = ['is_patient', 'is_caregiver', 'is_active', 'created_at', 'created_by']
+    readonly_fields = ['created_by', 'created_at', 'updated_at']
+    ordering = ['name']
+    
+    fieldsets = (
+        ('Dados Básicos', {
+            'fields': ('name', 'cpf', 'email', 'phone')
+        }),
+        ('Endereço', {
+            'fields': ('postal_code', 'state', 'city', 'district', 'street', 'number', 'complement'),
+            'classes': ('collapse',)
+        }),
+        ('Tipo de Pessoa', {
+            'fields': ('is_patient', 'is_caregiver', 'is_active')
+        }),
+        ('Informações do Paciente', {
+            'fields': ('colors', 'sounds', 'smells', 'hobbies'),
+            'classes': ('collapse',),
+            'description': 'Campos específicos para pacientes'
+        }),
+        ('Informações do Sistema', {
+            'fields': ('created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_person_types(self, obj):
+        """Mostra os tipos de pessoa de forma mais clara na listagem"""
+        types = []
+        if obj.is_patient:
+            types.append("👤 Paciente")
+        if obj.is_caregiver:
+            types.append("🤝 Cuidador")
+        
+        return " | ".join(types) if types else "❌ Sem tipo"
+    
+    get_person_types.short_description = "Tipos"
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # Se é um novo objeto
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        """Otimiza as consultas incluindo o usuário criador"""
+        return super().get_queryset(request).select_related('created_by')
