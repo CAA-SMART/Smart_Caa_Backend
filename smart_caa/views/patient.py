@@ -1,8 +1,14 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
-from ..models import Person
-from ..serializers import PatientSerializer
+from ..models import Person, PatientCaregiverRelationship
+from ..serializers import (
+    PatientSerializer, 
+    CaregiverForPatientSerializer,
+    PatientCaregiverRelationshipSerializer
+)
 
 
 @extend_schema(tags=['Patient'])
@@ -70,3 +76,93 @@ class PatientRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+
+@extend_schema(tags=['Patient'])
+class PatientCaregiversListView(generics.ListAPIView):
+    """
+    View para listar todos os cuidadores de um paciente específico
+    """
+    serializer_class = CaregiverForPatientSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        return PatientCaregiverRelationship.objects.filter(
+            patient_id=patient_id,
+            is_active=True
+        ).select_related('patient', 'caregiver')
+    
+    @extend_schema(
+        summary='Listar Cuidadores do Paciente',
+        description='Utilizado para listar todos os cuidadores vinculados a um paciente específico'
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+@extend_schema(tags=['Patient'])
+class PatientCaregiverCreateView(generics.CreateAPIView):
+    """
+    View para vincular um cuidador a um paciente
+    """
+    serializer_class = PatientCaregiverRelationshipSerializer
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        summary='Vincular Cuidador ao Paciente',
+        description='Utilizado para criar um vínculo entre um paciente e um cuidador'
+    )
+    def post(self, request, *args, **kwargs):
+        # Adiciona o patient_id da URL aos dados
+        patient_id = self.kwargs['patient_id']
+        data = request.data.copy()
+        data['patient'] = patient_id
+        
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def perform_create(self, serializer):
+        # Comentado temporariamente para testes sem autenticação
+        # serializer.save(created_by=self.request.user)
+        serializer.save()
+
+
+@extend_schema(tags=['Patient'])
+class PatientCaregiverDetailView(generics.RetrieveUpdateAPIView):
+    """
+    View para gerenciar um relacionamento específico entre paciente e cuidador
+    """
+    serializer_class = PatientCaregiverRelationshipSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        return PatientCaregiverRelationship.objects.filter(
+            patient_id=patient_id
+        )
+    
+    @extend_schema(
+        summary='Obter Relacionamento',
+        description='Utilizado para obter detalhes de um relacionamento específico'
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
+    @extend_schema(
+        summary='Atualizar Relacionamento',
+        description='Utilizado para atualizar um relacionamento entre paciente e cuidador'
+    )
+    def put(self, request, *args, **kwargs):
+        return super().put(request, *args, **kwargs)
+    
+    @extend_schema(
+        summary='Atualizar Parcialmente Relacionamento',
+        description='Utilizado para atualizar parcialmente um relacionamento'
+    )
+    def patch(self, request, *args, **kwargs):
+        return super().patch(request, *args, **kwargs)

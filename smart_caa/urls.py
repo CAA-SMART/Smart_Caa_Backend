@@ -6,8 +6,15 @@ from .views import (
     PictogramRetrieveUpdateDestroyView,
     PatientCreateListView,
     PatientRetrieveUpdateDestroyView,
+    PatientCaregiversListView,
+    PatientCaregiverCreateView,
+    PatientCaregiverDetailView,
     CaregiverCreateListView,
-    CaregiverRetrieveUpdateDestroyView
+    CaregiverRetrieveUpdateDestroyView,
+    CaregiverPatientsListView,
+    PatientCaregiverRelationshipListCreateView,
+    PatientCaregiverRelationshipDetailView,
+    PatientCaregiverRelationshipInactivateView
 )
 
 urlpatterns = [
@@ -23,7 +30,20 @@ urlpatterns = [
     path('api/patients/', PatientCreateListView.as_view(), name='patient-list-create'),
     path('api/patients/<int:pk>/', PatientRetrieveUpdateDestroyView.as_view(), name='patient-detail'),
     
+    # Patient-Caregiver relationship endpoints (specific to patient)
+    path('api/patients/<int:patient_id>/caregivers/', PatientCaregiversListView.as_view(), name='patient-caregivers-list'),
+    path('api/patients/<int:patient_id>/caregivers/create/', PatientCaregiverCreateView.as_view(), name='patient-caregiver-create'),
+    path('api/patients/<int:patient_id>/caregivers/<int:pk>/', PatientCaregiverDetailView.as_view(), name='patient-caregiver-detail'),
+    
     # Caregiver endpoints
     path('api/caregivers/', CaregiverCreateListView.as_view(), name='caregiver-list-create'),
     path('api/caregivers/<int:pk>/', CaregiverRetrieveUpdateDestroyView.as_view(), name='caregiver-detail'),
+    
+    # Caregiver-Patient relationship endpoints (specific to caregiver)
+    path('api/caregivers/<int:caregiver_id>/patients/', CaregiverPatientsListView.as_view(), name='caregiver-patients-list'),
+    
+    # General Patient-Caregiver relationship endpoints
+    path('api/relationships/', PatientCaregiverRelationshipListCreateView.as_view(), name='relationship-list-create'),
+    path('api/relationships/<int:pk>/', PatientCaregiverRelationshipDetailView.as_view(), name='relationship-detail'),
+    path('api/relationships/<int:pk>/inactivate/', PatientCaregiverRelationshipInactivateView.as_view(), name='relationship-inactivate'),
 ]

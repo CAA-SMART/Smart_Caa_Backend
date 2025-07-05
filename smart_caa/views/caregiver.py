@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema
-from ..models import Person
-from ..serializers import CaregiverSerializer
+from ..models import Person, PatientCaregiverRelationship
+from ..serializers import CaregiverSerializer, PatientForCaregiverSerializer
 
 
 @extend_schema(tags=['Caregiver'])
@@ -70,3 +70,26 @@ class CaregiverRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+
+@extend_schema(tags=['Caregiver'])
+class CaregiverPatientsListView(generics.ListAPIView):
+    """
+    View para listar todos os pacientes de um cuidador específico
+    """
+    serializer_class = PatientForCaregiverSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        caregiver_id = self.kwargs['caregiver_id']
+        return PatientCaregiverRelationship.objects.filter(
+            caregiver_id=caregiver_id,
+            is_active=True
+        ).select_related('patient', 'caregiver')
+    
+    @extend_schema(
+        summary='Listar Pacientes do Cuidador',
+        description='Utilizado para listar todos os pacientes vinculados a um cuidador específico'
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)

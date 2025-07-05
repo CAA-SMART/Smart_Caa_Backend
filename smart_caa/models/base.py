@@ -29,6 +29,23 @@ class BaseModel(models.Model):
         help_text="Indica se o registro está ativo no sistema"
     )
     
+    inactivated_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Data de inativação",
+        help_text="Data em que o registro foi inativado"
+    )
+    
+    inactivated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)s_inactivated",
+        verbose_name="Inativado por",
+        help_text="Usuário que inativou o registro"
+    )
+
     class Meta:
         abstract = True
         ordering = ['-created_at']

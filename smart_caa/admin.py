@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EverydayCategory, Pictogram, Person
+from .models import EverydayCategory, Pictogram, Person, PatientCaregiverRelationship
 
 
 class PictogramInline(admin.TabularInline):
@@ -105,3 +105,46 @@ class PersonAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         """Otimiza as consultas incluindo o usuário criador"""
         return super().get_queryset(request).select_related('created_by')
+
+
+@admin.register(PatientCaregiverRelationship)
+class PatientCaregiverRelationshipAdmin(admin.ModelAdmin):
+    list_display = [
+        'patient', 'caregiver', 'relationship_type', 'start_date', 
+        'is_active', 'created_by', 'created_at'
+    ]
+    search_fields = [
+        'patient__name', 'patient__cpf', 
+        'caregiver__name', 'caregiver__cpf'
+    ]
+    list_filter = [
+        'relationship_type', 'is_active', 'start_date', 
+        'created_at', 'created_by'
+    ]
+    readonly_fields = ['created_by', 'created_at', 'updated_at']
+    ordering = ['-start_date', 'patient__name']
+    
+    fieldsets = (
+        ('Relacionamento', {
+            'fields': ('patient', 'caregiver', 'relationship_type', 'start_date')
+        }),
+        ('Informações Adicionais', {
+            'fields': ('notes', 'is_active'),
+            'classes': ('collapse',)
+        }),
+        ('Informações do Sistema', {
+            'fields': ('created_by', 'created_at', 'updated_at', 'inactivated_at', 'inactivated_by'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # Se é um novo objeto
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        """Otimiza as consultas incluindo relacionamentos"""
+        return super().get_queryset(request).select_related(
+            'patient', 'caregiver', 'created_by', 'inactivated_by'
+        )
