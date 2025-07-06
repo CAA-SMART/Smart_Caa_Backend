@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from ..models import Pictogram
 from ..serializers import PictogramSerializer
@@ -9,7 +9,7 @@ from ..serializers import PictogramSerializer
 class PictogramCreateListView(generics.ListCreateAPIView):
     queryset = Pictogram.objects.all()
     serializer_class = PictogramSerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     @extend_schema(
         summary='Listar Pictogramas',
@@ -26,9 +26,7 @@ class PictogramCreateListView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
     
     def perform_create(self, serializer):
-        # Comentado temporariamente para testes sem autenticação
-        # serializer.save(created_by=self.request.user)
-        serializer.save()
+        serializer.save(created_by=self.request.user)
     
     def get_queryset(self):
         """Otimiza as consultas incluindo a categoria relacionada"""
@@ -39,7 +37,7 @@ class PictogramCreateListView(generics.ListCreateAPIView):
 class PictogramRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Pictogram.objects.all()
     serializer_class = PictogramSerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     @extend_schema(
         summary='Obter Pictograma',

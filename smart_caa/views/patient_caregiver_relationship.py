@@ -1,5 +1,5 @@
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.views import APIView
@@ -13,7 +13,7 @@ class PatientCaregiverRelationshipListCreateView(generics.ListCreateAPIView):
     """
     View para listar e criar relacionamentos entre pacientes e cuidadores
     """
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
     
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -59,9 +59,7 @@ class PatientCaregiverRelationshipListCreateView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
     
     def perform_create(self, serializer):
-        # Comentado temporariamente para testes sem autenticação
-        # serializer.save(created_by=self.request.user)
-        serializer.save()
+        serializer.save(created_by=self.request.user)
 
 
 @extend_schema(tags=['Patient-Caregiver Relationship'])
@@ -70,7 +68,7 @@ class PatientCaregiverRelationshipDetailView(generics.RetrieveUpdateAPIView):
     View para obter e atualizar relacionamentos específicos
     """
     serializer_class = PatientCaregiverRelationshipSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
     queryset = PatientCaregiverRelationship.objects.select_related(
         'patient', 'caregiver', 'created_by'
     )
@@ -102,7 +100,7 @@ class PatientCaregiverRelationshipInactivateView(APIView):
     """
     View para inativar um relacionamento específico
     """
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
     
     @extend_schema(
         summary='Inativar Relacionamento',
@@ -119,7 +117,7 @@ class PatientCaregiverRelationshipInactivateView(APIView):
                 )
             
             # relationship.inactivate(user=request.user)  # Descomentado quando tiver autenticação
-            relationship.inactivate()
+            relationship.inactivate(user=request.user)
             
             serializer = PatientCaregiverRelationshipSerializer(relationship)
             return Response({

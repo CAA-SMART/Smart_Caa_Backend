@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 from ..models import Person, PatientCaregiverRelationship
@@ -14,7 +15,7 @@ from ..serializers import (
 @extend_schema(tags=['Patient'])
 class PatientCreateListView(generics.ListCreateAPIView):
     serializer_class = PatientSerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     def get_queryset(self):
         """Retorna apenas pessoas que são pacientes"""
@@ -35,15 +36,13 @@ class PatientCreateListView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
     
     def perform_create(self, serializer):
-        # Comentado temporariamente para testes sem autenticação
-        # serializer.save(created_by=self.request.user)
-        serializer.save()
+        serializer.save(created_by=self.request.user)
 
 
 @extend_schema(tags=['Patient'])
 class PatientRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PatientSerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     def get_queryset(self):
         """Retorna apenas pessoas que são pacientes"""
@@ -84,7 +83,7 @@ class PatientCaregiversListView(generics.ListAPIView):
     View para listar todos os cuidadores de um paciente específico
     """
     serializer_class = CaregiverForPatientSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
     
     def get_queryset(self):
         patient_id = self.kwargs['patient_id']
@@ -107,7 +106,7 @@ class PatientCaregiverCreateView(generics.CreateAPIView):
     View para vincular um cuidador a um paciente
     """
     serializer_class = PatientCaregiverRelationshipSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
     
     @extend_schema(
         summary='Vincular Cuidador ao Paciente',
@@ -127,9 +126,7 @@ class PatientCaregiverCreateView(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def perform_create(self, serializer):
-        # Comentado temporariamente para testes sem autenticação
-        # serializer.save(created_by=self.request.user)
-        serializer.save()
+        serializer.save(created_by=self.request.user)
 
 
 @extend_schema(tags=['Patient'])
@@ -138,7 +135,7 @@ class PatientCaregiverDetailView(generics.RetrieveUpdateAPIView):
     View para gerenciar um relacionamento específico entre paciente e cuidador
     """
     serializer_class = PatientCaregiverRelationshipSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
     
     def get_queryset(self):
         patient_id = self.kwargs['patient_id']

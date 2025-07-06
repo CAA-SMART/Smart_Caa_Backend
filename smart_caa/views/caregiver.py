@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from ..models import Person, PatientCaregiverRelationship
 from ..serializers import CaregiverSerializer, PatientForCaregiverSerializer
@@ -8,7 +8,7 @@ from ..serializers import CaregiverSerializer, PatientForCaregiverSerializer
 @extend_schema(tags=['Caregiver'])
 class CaregiverCreateListView(generics.ListCreateAPIView):
     serializer_class = CaregiverSerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     def get_queryset(self):
         """Retorna apenas pessoas que são cuidadores"""
@@ -29,15 +29,13 @@ class CaregiverCreateListView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
     
     def perform_create(self, serializer):
-        # Comentado temporariamente para testes sem autenticação
-        # serializer.save(created_by=self.request.user)
-        serializer.save()
+        serializer.save(created_by=self.request.user)
 
 
 @extend_schema(tags=['Caregiver'])
 class CaregiverRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CaregiverSerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     def get_queryset(self):
         """Retorna apenas pessoas que são cuidadores"""
@@ -78,7 +76,7 @@ class CaregiverPatientsListView(generics.ListAPIView):
     View para listar todos os pacientes de um cuidador específico
     """
     serializer_class = PatientForCaregiverSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (IsAuthenticated,)
     
     def get_queryset(self):
         caregiver_id = self.kwargs['caregiver_id']

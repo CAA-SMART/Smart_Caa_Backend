@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from ..models import EverydayCategory
 from ..serializers import EverydayCategorySerializer
@@ -9,7 +9,7 @@ from ..serializers import EverydayCategorySerializer
 class EverydayCategoryCreateListView(generics.ListCreateAPIView):
     queryset = EverydayCategory.objects.all()
     serializer_class = EverydayCategorySerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     @extend_schema(
         summary='Listar Categorias do Cotidiano',
@@ -26,16 +26,14 @@ class EverydayCategoryCreateListView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
     
     def perform_create(self, serializer):
-        # Comentado temporariamente para testes sem autenticação
-        # serializer.save(created_by=self.request.user)
-        serializer.save()
+        serializer.save(created_by=self.request.user)
 
 
 @extend_schema(tags=['EverydayCategory'])
 class EverydayCategoryRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = EverydayCategory.objects.all()
     serializer_class = EverydayCategorySerializer
-    permission_classes = [AllowAny]  # Remove autenticação para testes
+    permission_classes = (IsAuthenticated,)
     
     @extend_schema(
         summary='Obter Categoria do Cotidiano',
