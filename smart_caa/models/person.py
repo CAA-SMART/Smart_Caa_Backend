@@ -39,6 +39,15 @@ class Person(BaseModel):
         help_text="Classificação Internacional de Doenças (formato: A00-B99, C00-D48)"
     )
     
+    # Profissão
+    profession = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Profissão",
+        help_text="Profissão ou ocupação da pessoa"
+    )
+    
     # Address data
     postal_code = models.CharField(
         max_length=10,

@@ -163,6 +163,7 @@ class CaregiverSerializer(serializers.ModelSerializer):
             'cpf',
             'email',
             'phone',
+            'profession',
             'postal_code',
             'state',
             'city',
@@ -189,6 +190,9 @@ class CaregiverSerializer(serializers.ModelSerializer):
             },
             'phone': {
                 'help_text': 'Telefone de contato do cuidador'
+            },
+            'profession': {
+                'help_text': 'Profissão ou ocupação do cuidador'
             },
             'postal_code': {
                 'help_text': 'CEP do endereço'
