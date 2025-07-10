@@ -21,6 +21,7 @@ class PatientSerializer(serializers.ModelSerializer):
             'cpf',
             'email',
             'phone',
+            'cid',
             'postal_code',
             'state',
             'city',
@@ -51,6 +52,9 @@ class PatientSerializer(serializers.ModelSerializer):
             },
             'phone': {
                 'help_text': 'Telefone de contato do paciente'
+            },
+            'cid': {
+                'help_text': 'Classificação Internacional de Doenças (formato: A00-B99, C00-D48)'
             },
             'postal_code': {
                 'help_text': 'CEP do endereço'

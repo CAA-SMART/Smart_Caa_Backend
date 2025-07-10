@@ -30,7 +30,16 @@ class Person(BaseModel):
         verbose_name="Contato",
         help_text="Número de telefone ou celular"
     )
-      # Address data
+    
+    cid = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name="CID",
+        help_text="Classificação Internacional de Doenças (formato: A00-B99, C00-D48)"
+    )
+    
+    # Address data
     postal_code = models.CharField(
         max_length=10,
         blank=True,

@@ -57,15 +57,15 @@ class PictogramAdmin(admin.ModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'cpf', 'get_person_types', 'email', 'phone', 'is_active', 'created_at']
-    search_fields = ['name', 'cpf', 'email', 'phone']
+    list_display = ['name', 'cpf', 'get_person_types', 'email', 'phone', 'cid', 'is_active', 'created_at']
+    search_fields = ['name', 'cpf', 'email', 'phone', 'cid']
     list_filter = ['is_patient', 'is_caregiver', 'is_active', 'created_at', 'created_by']
     readonly_fields = ['created_by', 'created_at', 'updated_at']
     ordering = ['name']
     
     fieldsets = (
         ('Dados Básicos', {
-            'fields': ('name', 'cpf', 'email', 'phone')
+            'fields': ('name', 'cpf', 'email', 'phone', 'cid')
         }),
         ('Endereço', {
             'fields': ('postal_code', 'state', 'city', 'district', 'street', 'number', 'complement'),
