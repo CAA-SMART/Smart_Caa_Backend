@@ -100,7 +100,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'pt-BR'
+LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
@@ -112,8 +112,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (uploaded files)
 MEDIA_URL = '/media/'
@@ -213,6 +213,10 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
     'SERVERS': [
         {
+            'url': 'https://janioalexandre.pythonanywhere.com',
+            'description': 'Produção'
+        },
+        {
             'url': 'http://localhost:8000',
             'description': 'Desenvolvimento'
         }    ],
@@ -238,8 +242,11 @@ SPECTACULAR_SETTINGS = {
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [
+    "https://janioalexandre.pythonanywhere.com",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 # Para desenvolvimento, permitir todas as origens (use com cuidado)
@@ -272,7 +279,7 @@ CORS_ALLOW_METHODS = [
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
