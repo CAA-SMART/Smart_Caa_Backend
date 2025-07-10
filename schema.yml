@@ -1,0 +1,2751 @@
+openapi: 3.0.3
+info:
+  title: Smart CAA API
+  version: 1.0.0
+  description: API para o sistema Smart CAA (Comunicação Aumentativa e Alternativa)
+paths:
+  /api/caregivers/:
+    get:
+      operationId: api_caregivers_list
+      description: Utilizado para listar todos os cuidadores cadastrados no sistema
+      summary: Listar Cuidadores
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Caregiver
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCaregiverList'
+          description: ''
+    post:
+      operationId: api_caregivers_create
+      description: Utilizado para cadastrar um novo cuidador. Se o CPF já existir,
+        a pessoa será marcada também como cuidador.
+      summary: Cadastrar Cuidador
+      tags:
+      - Caregiver
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaregiverRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CaregiverRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CaregiverRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Caregiver'
+          description: ''
+  /api/caregivers/{caregiver_id}/patients/:
+    get:
+      operationId: api_caregivers_patients_list
+      description: Utilizado para listar todos os pacientes vinculados a um cuidador
+        específico
+      summary: Listar Pacientes do Cuidador
+      parameters:
+      - in: path
+        name: caregiver_id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Caregiver
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPatientForCaregiverList'
+          description: ''
+  /api/caregivers/{id}/:
+    get:
+      operationId: api_caregivers_retrieve
+      description: Utilizado para obter os dados de um cuidador específico
+      summary: Obter Cuidador
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Caregiver
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Caregiver'
+          description: ''
+    put:
+      operationId: api_caregivers_update
+      description: Utilizado para atualizar completamente os dados de um cuidador
+      summary: Atualizar Cuidador
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Caregiver
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaregiverRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CaregiverRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CaregiverRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Caregiver'
+          description: ''
+    patch:
+      operationId: api_caregivers_partial_update
+      description: Utilizado para atualizar parcialmente os dados de um cuidador
+      summary: Atualizar Parcialmente Cuidador
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Caregiver
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCaregiverRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCaregiverRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCaregiverRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Caregiver'
+          description: ''
+    delete:
+      operationId: api_caregivers_destroy
+      description: Utilizado para deletar um cuidador do sistema
+      summary: Deletar Cuidador
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Caregiver
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/everyday-categories/:
+    get:
+      operationId: api_everyday_categories_list
+      description: Utilizado para listar todas as categorias do cotidiano
+      summary: Listar Categorias do Cotidiano
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - EverydayCategory
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEverydayCategoryList'
+          description: ''
+    post:
+      operationId: api_everyday_categories_create
+      description: Utilizado para criar uma nova categoria do cotidiano
+      summary: Criar Categoria do Cotidiano
+      tags:
+      - EverydayCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EverydayCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EverydayCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EverydayCategoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EverydayCategory'
+          description: ''
+  /api/everyday-categories/{id}/:
+    get:
+      operationId: api_everyday_categories_retrieve
+      description: Utilizado para obter uma categoria do cotidiano específica
+      summary: Obter Categoria do Cotidiano
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - EverydayCategory
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EverydayCategory'
+          description: ''
+    put:
+      operationId: api_everyday_categories_update
+      description: Utilizado para atualizar completamente uma categoria do cotidiano
+      summary: Atualizar Categoria do Cotidiano
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - EverydayCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EverydayCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EverydayCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EverydayCategoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EverydayCategory'
+          description: ''
+    patch:
+      operationId: api_everyday_categories_partial_update
+      description: Utilizado para atualizar parcialmente uma categoria do cotidiano
+      summary: Atualizar Parcialmente Categoria do Cotidiano
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - EverydayCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEverydayCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEverydayCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEverydayCategoryRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EverydayCategory'
+          description: ''
+    delete:
+      operationId: api_everyday_categories_destroy
+      description: Utilizado para deletar uma categoria do cotidiano
+      summary: Deletar Categoria do Cotidiano
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - EverydayCategory
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/patients/:
+    get:
+      operationId: api_patients_list
+      description: Utilizado para listar todos os pacientes cadastrados no sistema.
+        Opcionalmente pode filtrar por CPF usando o parâmetro ?cpf=12345678901
+      summary: Listar Pacientes
+      parameters:
+      - in: query
+        name: cpf
+        schema:
+          type: string
+        description: CPF do paciente para filtrar (aceita com ou sem formatação)
+        examples:
+          CPFSemFormatação:
+            value: '12345678901'
+            summary: CPF sem formatação
+            description: CPF apenas com números
+          CPFComFormatação:
+            value: 123.456.789-01
+            summary: CPF com formatação
+            description: CPF com pontos e traço
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Patient
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPatientList'
+          description: ''
+    post:
+      operationId: api_patients_create
+      description: Utilizado para cadastrar um novo paciente. Se o CPF já existir,
+        a pessoa será marcada também como paciente.
+      summary: Cadastrar Paciente
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+  /api/patients/{patient_id}/caregivers/:
+    get:
+      operationId: api_patients_caregivers_list
+      description: Utilizado para listar todos os cuidadores vinculados a um paciente
+        específico
+      summary: Listar Cuidadores do Paciente
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCaregiverForPatientList'
+          description: ''
+  /api/patients/{patient_id}/caregivers/{id}/:
+    get:
+      operationId: api_patients_caregivers_retrieve
+      description: Utilizado para obter detalhes de um relacionamento específico
+      summary: Obter Relacionamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+    put:
+      operationId: api_patients_caregivers_update
+      description: Utilizado para atualizar um relacionamento entre paciente e cuidador
+      summary: Atualizar Relacionamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+    patch:
+      operationId: api_patients_caregivers_partial_update
+      description: Utilizado para atualizar parcialmente um relacionamento
+      summary: Atualizar Parcialmente Relacionamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientCaregiverRelationshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientCaregiverRelationshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientCaregiverRelationshipRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+  /api/patients/{patient_id}/caregivers/create/:
+    post:
+      operationId: api_patients_caregivers_create_create
+      description: Utilizado para criar um vínculo entre um paciente e um cuidador
+      summary: Vincular Cuidador ao Paciente
+      parameters:
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+  /api/patients/{id}/:
+    get:
+      operationId: api_patients_retrieve
+      description: Utilizado para obter os dados de um paciente específico
+      summary: Obter Paciente
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    put:
+      operationId: api_patients_update
+      description: Utilizado para atualizar completamente os dados de um paciente
+      summary: Atualizar Paciente
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    patch:
+      operationId: api_patients_partial_update
+      description: Utilizado para atualizar parcialmente os dados de um paciente
+      summary: Atualizar Parcialmente Paciente
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    delete:
+      operationId: api_patients_destroy
+      description: Utilizado para deletar um paciente do sistema
+      summary: Deletar Paciente
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/person/cpf/{cpf}/:
+    get:
+      operationId: api_person_cpf_retrieve
+      description: Busca pessoa pelo CPF e retorna informações sobre usuário associado
+      summary: Buscar Pessoa por CPF
+      parameters:
+      - in: path
+        name: cpf
+        schema:
+          type: string
+        required: true
+      tags:
+      - Person
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Pessoa não encontrada
+          description: ''
+  /api/pictograms/:
+    get:
+      operationId: api_pictograms_list
+      description: Utilizado para listar todos os pictogramas
+      summary: Listar Pictogramas
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Pictogram
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPictogramList'
+          description: ''
+    post:
+      operationId: api_pictograms_create
+      description: Utilizado para criar um novo pictograma
+      summary: Criar Pictograma
+      tags:
+      - Pictogram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PictogramRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PictogramRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PictogramRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pictogram'
+          description: ''
+  /api/pictograms/{id}/:
+    get:
+      operationId: api_pictograms_retrieve
+      description: Utilizado para obter um pictograma específico
+      summary: Obter Pictograma
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Pictogram
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pictogram'
+          description: ''
+    put:
+      operationId: api_pictograms_update
+      description: Utilizado para atualizar completamente um pictograma
+      summary: Atualizar Pictograma
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Pictogram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PictogramRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PictogramRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PictogramRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pictogram'
+          description: ''
+    patch:
+      operationId: api_pictograms_partial_update
+      description: Utilizado para atualizar parcialmente um pictograma
+      summary: Atualizar Parcialmente Pictograma
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Pictogram
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPictogramRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPictogramRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPictogramRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pictogram'
+          description: ''
+    delete:
+      operationId: api_pictograms_destroy
+      description: Utilizado para deletar um pictograma
+      summary: Deletar Pictograma
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Pictogram
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/relationships/:
+    get:
+      operationId: api_relationships_list
+      description: 'Utilizado para listar relacionamentos entre pacientes e cuidadores.
+        Suporta filtros: ?patient=ID&caregiver=ID&type=TIPO&active=true/false'
+      summary: Listar Relacionamentos
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Patient-Caregiver Relationship
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPatientCaregiverListList'
+          description: ''
+    post:
+      operationId: api_relationships_create
+      description: Utilizado para criar um novo relacionamento entre paciente e cuidador
+      summary: Criar Relacionamento
+      tags:
+      - Patient-Caregiver Relationship
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+  /api/relationships/{id}/:
+    get:
+      operationId: api_relationships_retrieve
+      description: Utilizado para obter detalhes de um relacionamento específico
+      summary: Obter Relacionamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient-Caregiver Relationship
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+    put:
+      operationId: api_relationships_update
+      description: Utilizado para atualizar completamente um relacionamento
+      summary: Atualizar Relacionamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient-Caregiver Relationship
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientCaregiverRelationshipRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+    patch:
+      operationId: api_relationships_partial_update
+      description: Utilizado para atualizar parcialmente um relacionamento
+      summary: Atualizar Parcialmente Relacionamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient-Caregiver Relationship
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientCaregiverRelationshipRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientCaregiverRelationshipRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientCaregiverRelationshipRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationship'
+          description: ''
+  /api/relationships/{id}/inactivate/:
+    post:
+      operationId: api_relationships_inactivate_create
+      description: Utilizado para inativar um relacionamento entre paciente e cuidador
+      summary: Inativar Relacionamento
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient-Caregiver Relationship
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/user/{user_id}/person/:
+    get:
+      operationId: api_user_person_retrieve
+      description: Retorna os dados da pessoa associada ao usuário especificado pelo
+        ID
+      summary: Obter Pessoa por ID do Usuário
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Person
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Usuário não encontrado ou não possui pessoa associada
+          description: ''
+  /authentication/logout/:
+    post:
+      operationId: authentication_logout_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /authentication/refresh/:
+    post:
+      operationId: authentication_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /authentication/token:
+    post:
+      operationId: authentication_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /authentication/verify/:
+    post:
+      operationId: authentication_verify_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+components:
+  schemas:
+    Caregiver:
+      type: object
+      description: Serializer para Cuidador
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Nome completo
+          description: Nome completo do cuidador
+          maxLength: 200
+        cpf:
+          type: string
+          description: 'CPF do cuidador (formato: 000.000.000-00)'
+          maxLength: 14
+        email:
+          type: string
+          format: email
+          title: E-mail
+          description: E-mail do cuidador
+          maxLength: 254
+        phone:
+          type: string
+          title: Contato
+          description: Telefone de contato do cuidador
+          maxLength: 20
+        profession:
+          type: string
+          nullable: true
+          title: Profissão
+          description: Profissão ou ocupação do cuidador
+          maxLength: 100
+        postal_code:
+          type: string
+          nullable: true
+          title: CEP
+          description: CEP do endereço
+          maxLength: 10
+        state:
+          type: string
+          nullable: true
+          title: UF
+          description: Estado (UF)
+          maxLength: 2
+        city:
+          type: string
+          nullable: true
+          title: Cidade
+          description: Cidade
+          maxLength: 100
+        district:
+          type: string
+          nullable: true
+          title: Bairro
+          description: Bairro
+          maxLength: 100
+        street:
+          type: string
+          nullable: true
+          title: Logradouro
+          description: Logradouro (rua, avenida, etc.)
+          maxLength: 200
+        number:
+          type: string
+          nullable: true
+          title: Número
+          description: Número da residência
+          maxLength: 10
+        complement:
+          type: string
+          nullable: true
+          title: Complemento
+          description: Complemento do endereço
+          maxLength: 100
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o cuidador está ativo no sistema
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou o cuidador
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - cpf
+      - created_at
+      - created_by
+      - created_by_username
+      - email
+      - id
+      - name
+      - phone
+      - updated_at
+    CaregiverForPatient:
+      type: object
+      description: Serializer para mostrar cuidadores de um paciente
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        caregiver_id:
+          type: integer
+        caregiver_name:
+          type: string
+        caregiver_email:
+          type: string
+          format: email
+        caregiver_phone:
+          type: string
+        relationship_type:
+          allOf:
+          - $ref: '#/components/schemas/RelationshipTypeEnum'
+          title: Tipo de Vínculo
+          description: |-
+            Tipo de relacionamento entre paciente e cuidador
+
+            * `FAMILY` - Familiar
+            * `PROFESSIONAL` - Profissional
+            * `FRIEND` - Amigo
+            * `VOLUNTEER` - Voluntário
+            * `OTHER` - Outros
+        relationship_type_display:
+          type: string
+        start_date:
+          type: string
+          format: date
+          title: Data de Início
+          description: Data de início do vínculo entre paciente e cuidador
+        notes:
+          type: string
+          nullable: true
+          title: Observações
+          description: Observações sobre o relacionamento
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+      required:
+      - caregiver_email
+      - caregiver_id
+      - caregiver_name
+      - caregiver_phone
+      - id
+      - relationship_type
+      - relationship_type_display
+      - start_date
+    CaregiverRequest:
+      type: object
+      description: Serializer para Cuidador
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome completo
+          description: Nome completo do cuidador
+          maxLength: 200
+        cpf:
+          type: string
+          minLength: 1
+          description: 'CPF do cuidador (formato: 000.000.000-00)'
+          maxLength: 14
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: E-mail
+          description: E-mail do cuidador
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          title: Contato
+          description: Telefone de contato do cuidador
+          maxLength: 20
+        profession:
+          type: string
+          nullable: true
+          title: Profissão
+          description: Profissão ou ocupação do cuidador
+          maxLength: 100
+        postal_code:
+          type: string
+          nullable: true
+          title: CEP
+          description: CEP do endereço
+          maxLength: 10
+        state:
+          type: string
+          nullable: true
+          title: UF
+          description: Estado (UF)
+          maxLength: 2
+        city:
+          type: string
+          nullable: true
+          title: Cidade
+          description: Cidade
+          maxLength: 100
+        district:
+          type: string
+          nullable: true
+          title: Bairro
+          description: Bairro
+          maxLength: 100
+        street:
+          type: string
+          nullable: true
+          title: Logradouro
+          description: Logradouro (rua, avenida, etc.)
+          maxLength: 200
+        number:
+          type: string
+          nullable: true
+          title: Número
+          description: Número da residência
+          maxLength: 10
+        complement:
+          type: string
+          nullable: true
+          title: Complemento
+          description: Complemento do endereço
+          maxLength: 100
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+          description: Senha para o usuário do sistema (mínimo 8 caracteres)
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o cuidador está ativo no sistema
+      required:
+      - cpf
+      - email
+      - name
+      - password
+      - phone
+    EverydayCategory:
+      type: object
+      description: Serializer para Categoria do Cotidiano
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: ID único da categoria
+        name:
+          type: string
+          title: Nome da categoria
+          description: Nome da categoria do cotidiano
+          maxLength: 100
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se a categoria está ativa
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou a categoria
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+          description: Data e hora de criação da categoria
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+          description: Data e hora da última atualização
+      required:
+      - created_at
+      - created_by
+      - created_by_username
+      - id
+      - name
+      - updated_at
+    EverydayCategoryRequest:
+      type: object
+      description: Serializer para Categoria do Cotidiano
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome da categoria
+          description: Nome da categoria do cotidiano
+          maxLength: 100
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se a categoria está ativa
+      required:
+      - name
+    PaginatedCaregiverForPatientList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaregiverForPatient'
+    PaginatedCaregiverList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Caregiver'
+    PaginatedEverydayCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EverydayCategory'
+    PaginatedPatientCaregiverListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientCaregiverList'
+    PaginatedPatientForCaregiverList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientForCaregiver'
+    PaginatedPatientList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Patient'
+    PaginatedPictogramList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pictogram'
+    PatchedCaregiverRequest:
+      type: object
+      description: Serializer para Cuidador
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome completo
+          description: Nome completo do cuidador
+          maxLength: 200
+        cpf:
+          type: string
+          minLength: 1
+          description: 'CPF do cuidador (formato: 000.000.000-00)'
+          maxLength: 14
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: E-mail
+          description: E-mail do cuidador
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          title: Contato
+          description: Telefone de contato do cuidador
+          maxLength: 20
+        profession:
+          type: string
+          nullable: true
+          title: Profissão
+          description: Profissão ou ocupação do cuidador
+          maxLength: 100
+        postal_code:
+          type: string
+          nullable: true
+          title: CEP
+          description: CEP do endereço
+          maxLength: 10
+        state:
+          type: string
+          nullable: true
+          title: UF
+          description: Estado (UF)
+          maxLength: 2
+        city:
+          type: string
+          nullable: true
+          title: Cidade
+          description: Cidade
+          maxLength: 100
+        district:
+          type: string
+          nullable: true
+          title: Bairro
+          description: Bairro
+          maxLength: 100
+        street:
+          type: string
+          nullable: true
+          title: Logradouro
+          description: Logradouro (rua, avenida, etc.)
+          maxLength: 200
+        number:
+          type: string
+          nullable: true
+          title: Número
+          description: Número da residência
+          maxLength: 10
+        complement:
+          type: string
+          nullable: true
+          title: Complemento
+          description: Complemento do endereço
+          maxLength: 100
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+          description: Senha para o usuário do sistema (mínimo 8 caracteres)
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o cuidador está ativo no sistema
+    PatchedEverydayCategoryRequest:
+      type: object
+      description: Serializer para Categoria do Cotidiano
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome da categoria
+          description: Nome da categoria do cotidiano
+          maxLength: 100
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se a categoria está ativa
+    PatchedPatientCaregiverRelationshipRequest:
+      type: object
+      description: Serializer para Relacionamento Paciente-Cuidador
+      properties:
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente
+        caregiver:
+          type: integer
+          title: Cuidador
+          description: ID do cuidador
+        relationship_type:
+          allOf:
+          - $ref: '#/components/schemas/RelationshipTypeEnum'
+          title: Tipo de Vínculo
+          description: |-
+            Tipo de relacionamento (FAMILY, PROFESSIONAL, FRIEND, VOLUNTEER, OTHER)
+
+            * `FAMILY` - Familiar
+            * `PROFESSIONAL` - Profissional
+            * `FRIEND` - Amigo
+            * `VOLUNTEER` - Voluntário
+            * `OTHER` - Outros
+        start_date:
+          type: string
+          format: date
+          title: Data de Início
+          description: Data de início do relacionamento
+        notes:
+          type: string
+          nullable: true
+          title: Observações
+          description: Observações sobre o relacionamento
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o relacionamento está ativo
+    PatchedPatientRequest:
+      type: object
+      description: Serializer para Paciente
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome completo
+          description: Nome completo do paciente
+          maxLength: 200
+        cpf:
+          type: string
+          minLength: 1
+          description: 'CPF do paciente (formato: 000.000.000-00)'
+          maxLength: 14
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: E-mail
+          description: E-mail do paciente
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          title: Contato
+          description: Telefone de contato do paciente
+          maxLength: 20
+        cid:
+          type: string
+          nullable: true
+          description: 'Classificação Internacional de Doenças (formato: A00-B99,
+            C00-D48)'
+          maxLength: 20
+        postal_code:
+          type: string
+          nullable: true
+          title: CEP
+          description: CEP do endereço
+          maxLength: 10
+        state:
+          type: string
+          nullable: true
+          title: UF
+          description: Estado (UF)
+          maxLength: 2
+        city:
+          type: string
+          nullable: true
+          title: Cidade
+          description: Cidade
+          maxLength: 100
+        district:
+          type: string
+          nullable: true
+          title: Bairro
+          description: Bairro
+          maxLength: 100
+        street:
+          type: string
+          nullable: true
+          title: Logradouro
+          description: Logradouro (rua, avenida, etc.)
+          maxLength: 200
+        number:
+          type: string
+          nullable: true
+          title: Número
+          description: Número da residência
+          maxLength: 10
+        complement:
+          type: string
+          nullable: true
+          title: Complemento
+          description: Complemento do endereço
+          maxLength: 100
+        colors:
+          type: string
+          nullable: true
+          title: Cores
+          description: Cores que o paciente gosta ou tem preferência
+        sounds:
+          type: string
+          nullable: true
+          title: Toques
+          description: Sons, toques ou músicas que o paciente aprecia
+        smells:
+          type: string
+          nullable: true
+          title: Cheiros
+          description: Cheiros que o paciente gosta ou reconhece
+        hobbies:
+          type: string
+          nullable: true
+          description: Atividades e hobbies do paciente
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+          description: Senha para o usuário do sistema (mínimo 8 caracteres)
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o paciente está ativo no sistema
+    PatchedPictogramRequest:
+      type: object
+      description: Serializer para Pictogram
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome do pictograma
+          description: Nome do pictograma
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: Descrição
+          description: Descrição adicional do pictograma
+        category:
+          type: integer
+          title: Categoria
+          description: ID da categoria do cotidiano
+        image:
+          type: string
+          format: binary
+          title: Imagem do pictograma
+          description: Arquivo de imagem do pictograma
+        audio:
+          type: string
+          format: binary
+          nullable: true
+          title: Áudio do pictograma
+          description: Arquivo de áudio do pictograma (opcional)
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o pictograma está ativo
+    Patient:
+      type: object
+      description: Serializer para Paciente
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Nome completo
+          description: Nome completo do paciente
+          maxLength: 200
+        cpf:
+          type: string
+          description: 'CPF do paciente (formato: 000.000.000-00)'
+          maxLength: 14
+        email:
+          type: string
+          format: email
+          title: E-mail
+          description: E-mail do paciente
+          maxLength: 254
+        phone:
+          type: string
+          title: Contato
+          description: Telefone de contato do paciente
+          maxLength: 20
+        cid:
+          type: string
+          nullable: true
+          description: 'Classificação Internacional de Doenças (formato: A00-B99,
+            C00-D48)'
+          maxLength: 20
+        postal_code:
+          type: string
+          nullable: true
+          title: CEP
+          description: CEP do endereço
+          maxLength: 10
+        state:
+          type: string
+          nullable: true
+          title: UF
+          description: Estado (UF)
+          maxLength: 2
+        city:
+          type: string
+          nullable: true
+          title: Cidade
+          description: Cidade
+          maxLength: 100
+        district:
+          type: string
+          nullable: true
+          title: Bairro
+          description: Bairro
+          maxLength: 100
+        street:
+          type: string
+          nullable: true
+          title: Logradouro
+          description: Logradouro (rua, avenida, etc.)
+          maxLength: 200
+        number:
+          type: string
+          nullable: true
+          title: Número
+          description: Número da residência
+          maxLength: 10
+        complement:
+          type: string
+          nullable: true
+          title: Complemento
+          description: Complemento do endereço
+          maxLength: 100
+        colors:
+          type: string
+          nullable: true
+          title: Cores
+          description: Cores que o paciente gosta ou tem preferência
+        sounds:
+          type: string
+          nullable: true
+          title: Toques
+          description: Sons, toques ou músicas que o paciente aprecia
+        smells:
+          type: string
+          nullable: true
+          title: Cheiros
+          description: Cheiros que o paciente gosta ou reconhece
+        hobbies:
+          type: string
+          nullable: true
+          description: Atividades e hobbies do paciente
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o paciente está ativo no sistema
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou o paciente
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - cpf
+      - created_at
+      - created_by
+      - created_by_username
+      - email
+      - id
+      - name
+      - phone
+      - updated_at
+    PatientCaregiverList:
+      type: object
+      description: Serializer simplificado para listagem de relacionamentos
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: Paciente
+          description: Pessoa que é paciente neste relacionamento
+        patient_name:
+          type: string
+          readOnly: true
+        caregiver:
+          type: integer
+          title: Cuidador
+          description: Pessoa que é cuidador neste relacionamento
+        caregiver_name:
+          type: string
+          readOnly: true
+        relationship_type:
+          allOf:
+          - $ref: '#/components/schemas/RelationshipTypeEnum'
+          title: Tipo de Vínculo
+          description: |-
+            Tipo de relacionamento entre paciente e cuidador
+
+            * `FAMILY` - Familiar
+            * `PROFESSIONAL` - Profissional
+            * `FRIEND` - Amigo
+            * `VOLUNTEER` - Voluntário
+            * `OTHER` - Outros
+        relationship_type_display:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          title: Data de Início
+          description: Data de início do vínculo entre paciente e cuidador
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+      required:
+      - caregiver
+      - caregiver_name
+      - id
+      - patient
+      - patient_name
+      - relationship_type
+      - relationship_type_display
+      - start_date
+    PatientCaregiverRelationship:
+      type: object
+      description: Serializer para Relacionamento Paciente-Cuidador
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente
+        patient_name:
+          type: string
+          readOnly: true
+          description: Nome do paciente
+        caregiver:
+          type: integer
+          title: Cuidador
+          description: ID do cuidador
+        caregiver_name:
+          type: string
+          readOnly: true
+          description: Nome do cuidador
+        relationship_type:
+          allOf:
+          - $ref: '#/components/schemas/RelationshipTypeEnum'
+          title: Tipo de Vínculo
+          description: |-
+            Tipo de relacionamento (FAMILY, PROFESSIONAL, FRIEND, VOLUNTEER, OTHER)
+
+            * `FAMILY` - Familiar
+            * `PROFESSIONAL` - Profissional
+            * `FRIEND` - Amigo
+            * `VOLUNTEER` - Voluntário
+            * `OTHER` - Outros
+        relationship_type_display:
+          type: string
+          readOnly: true
+          description: Descrição do tipo de relacionamento
+        start_date:
+          type: string
+          format: date
+          title: Data de Início
+          description: Data de início do relacionamento
+        notes:
+          type: string
+          nullable: true
+          title: Observações
+          description: Observações sobre o relacionamento
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o relacionamento está ativo
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou o relacionamento
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - caregiver
+      - caregiver_name
+      - created_at
+      - created_by
+      - created_by_username
+      - id
+      - patient
+      - patient_name
+      - relationship_type
+      - relationship_type_display
+      - start_date
+      - updated_at
+    PatientCaregiverRelationshipRequest:
+      type: object
+      description: Serializer para Relacionamento Paciente-Cuidador
+      properties:
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente
+        caregiver:
+          type: integer
+          title: Cuidador
+          description: ID do cuidador
+        relationship_type:
+          allOf:
+          - $ref: '#/components/schemas/RelationshipTypeEnum'
+          title: Tipo de Vínculo
+          description: |-
+            Tipo de relacionamento (FAMILY, PROFESSIONAL, FRIEND, VOLUNTEER, OTHER)
+
+            * `FAMILY` - Familiar
+            * `PROFESSIONAL` - Profissional
+            * `FRIEND` - Amigo
+            * `VOLUNTEER` - Voluntário
+            * `OTHER` - Outros
+        start_date:
+          type: string
+          format: date
+          title: Data de Início
+          description: Data de início do relacionamento
+        notes:
+          type: string
+          nullable: true
+          title: Observações
+          description: Observações sobre o relacionamento
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o relacionamento está ativo
+      required:
+      - caregiver
+      - patient
+      - relationship_type
+      - start_date
+    PatientForCaregiver:
+      type: object
+      description: Serializer para mostrar pacientes de um cuidador
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient_id:
+          type: integer
+        patient_name:
+          type: string
+        patient_email:
+          type: string
+          format: email
+        patient_phone:
+          type: string
+        relationship_type:
+          allOf:
+          - $ref: '#/components/schemas/RelationshipTypeEnum'
+          title: Tipo de Vínculo
+          description: |-
+            Tipo de relacionamento entre paciente e cuidador
+
+            * `FAMILY` - Familiar
+            * `PROFESSIONAL` - Profissional
+            * `FRIEND` - Amigo
+            * `VOLUNTEER` - Voluntário
+            * `OTHER` - Outros
+        relationship_type_display:
+          type: string
+        start_date:
+          type: string
+          format: date
+          title: Data de Início
+          description: Data de início do vínculo entre paciente e cuidador
+        notes:
+          type: string
+          nullable: true
+          title: Observações
+          description: Observações sobre o relacionamento
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+      required:
+      - id
+      - patient_email
+      - patient_id
+      - patient_name
+      - patient_phone
+      - relationship_type
+      - relationship_type_display
+      - start_date
+    PatientRequest:
+      type: object
+      description: Serializer para Paciente
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome completo
+          description: Nome completo do paciente
+          maxLength: 200
+        cpf:
+          type: string
+          minLength: 1
+          description: 'CPF do paciente (formato: 000.000.000-00)'
+          maxLength: 14
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: E-mail
+          description: E-mail do paciente
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          title: Contato
+          description: Telefone de contato do paciente
+          maxLength: 20
+        cid:
+          type: string
+          nullable: true
+          description: 'Classificação Internacional de Doenças (formato: A00-B99,
+            C00-D48)'
+          maxLength: 20
+        postal_code:
+          type: string
+          nullable: true
+          title: CEP
+          description: CEP do endereço
+          maxLength: 10
+        state:
+          type: string
+          nullable: true
+          title: UF
+          description: Estado (UF)
+          maxLength: 2
+        city:
+          type: string
+          nullable: true
+          title: Cidade
+          description: Cidade
+          maxLength: 100
+        district:
+          type: string
+          nullable: true
+          title: Bairro
+          description: Bairro
+          maxLength: 100
+        street:
+          type: string
+          nullable: true
+          title: Logradouro
+          description: Logradouro (rua, avenida, etc.)
+          maxLength: 200
+        number:
+          type: string
+          nullable: true
+          title: Número
+          description: Número da residência
+          maxLength: 10
+        complement:
+          type: string
+          nullable: true
+          title: Complemento
+          description: Complemento do endereço
+          maxLength: 100
+        colors:
+          type: string
+          nullable: true
+          title: Cores
+          description: Cores que o paciente gosta ou tem preferência
+        sounds:
+          type: string
+          nullable: true
+          title: Toques
+          description: Sons, toques ou músicas que o paciente aprecia
+        smells:
+          type: string
+          nullable: true
+          title: Cheiros
+          description: Cheiros que o paciente gosta ou reconhece
+        hobbies:
+          type: string
+          nullable: true
+          description: Atividades e hobbies do paciente
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+          description: Senha para o usuário do sistema (mínimo 8 caracteres)
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o paciente está ativo no sistema
+      required:
+      - cpf
+      - email
+      - name
+      - password
+      - phone
+    Person:
+      type: object
+      description: |-
+        Serializer completo para Person (usado para consultas gerais)
+        Inclui todos os campos disponíveis da pessoa
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: ID do usuário associado a esta pessoa
+        username:
+          type: string
+          readOnly: true
+          nullable: true
+          description: Nome de usuário associado a esta pessoa
+        name:
+          type: string
+          title: Nome completo
+          description: Nome completo da pessoa
+          maxLength: 200
+        cpf:
+          type: string
+          description: 'CPF da pessoa (formato: 000.000.000-00)'
+          maxLength: 14
+        email:
+          type: string
+          format: email
+          title: E-mail
+          description: Endereço de e-mail da pessoa
+          maxLength: 254
+        phone:
+          type: string
+          title: Contato
+          description: Número de telefone ou celular
+          maxLength: 20
+        cid:
+          type: string
+          nullable: true
+          description: 'Classificação Internacional de Doenças (formato: A00-B99,
+            C00-D48)'
+          maxLength: 20
+        profession:
+          type: string
+          nullable: true
+          title: Profissão
+          description: Profissão ou ocupação da pessoa
+          maxLength: 100
+        postal_code:
+          type: string
+          nullable: true
+          title: CEP
+          description: 'Código de Endereçamento Postal (formato: 00000-000)'
+          maxLength: 10
+        state:
+          type: string
+          nullable: true
+          title: UF
+          description: Unidade Federativa (Estado)
+          maxLength: 2
+        city:
+          type: string
+          nullable: true
+          title: Cidade
+          description: Nome da cidade
+          maxLength: 100
+        district:
+          type: string
+          nullable: true
+          title: Bairro
+          description: Nome do bairro
+          maxLength: 100
+        street:
+          type: string
+          nullable: true
+          title: Logradouro
+          description: Rua, avenida, travessa, etc.
+          maxLength: 200
+        number:
+          type: string
+          nullable: true
+          title: Número
+          description: Número da residência/estabelecimento
+          maxLength: 10
+        complement:
+          type: string
+          nullable: true
+          title: Complemento
+          description: Apartamento, bloco, casa, etc.
+          maxLength: 100
+        is_patient:
+          type: boolean
+          title: É Paciente
+          description: Indica se a pessoa é um paciente
+        is_caregiver:
+          type: boolean
+          title: É Cuidador
+          description: Indica se a pessoa é um cuidador
+        person_types:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: Tipos da pessoa (Paciente, Cuidador ou ambos)
+        colors:
+          type: string
+          nullable: true
+          title: Cores
+          description: Cores que o paciente gosta ou tem preferência
+        sounds:
+          type: string
+          nullable: true
+          title: Toques
+          description: Sons, toques ou músicas que o paciente aprecia
+        smells:
+          type: string
+          nullable: true
+          title: Cheiros
+          description: Cheiros que o paciente gosta ou reconhece
+        hobbies:
+          type: string
+          nullable: true
+          description: Atividades e hobbies do paciente
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou o registro
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+        inactivated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Data de inativação
+          description: Data em que o registro foi inativado
+      required:
+      - cpf
+      - created_at
+      - created_by
+      - created_by_username
+      - email
+      - id
+      - inactivated_at
+      - name
+      - person_types
+      - phone
+      - updated_at
+      - user_id
+      - username
+    Pictogram:
+      type: object
+      description: Serializer para Pictogram
+      properties:
+        id:
+          type: integer
+          readOnly: true
+          description: ID único do pictograma
+        name:
+          type: string
+          title: Nome do pictograma
+          description: Nome do pictograma
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: Descrição
+          description: Descrição adicional do pictograma
+        category:
+          type: integer
+          title: Categoria
+          description: ID da categoria do cotidiano
+        category_name:
+          type: string
+          readOnly: true
+          description: Nome da categoria do pictograma
+        image:
+          type: string
+          format: uri
+          title: Imagem do pictograma
+          description: Arquivo de imagem do pictograma
+        image_url:
+          type: string
+          readOnly: true
+          description: URL completa da imagem do pictograma
+        audio:
+          type: string
+          format: uri
+          nullable: true
+          title: Áudio do pictograma
+          description: Arquivo de áudio do pictograma (opcional)
+        audio_url:
+          type: string
+          readOnly: true
+          description: URL completa do áudio do pictograma
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o pictograma está ativo
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou o pictograma
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+          description: Data e hora de criação do pictograma
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+          description: Data e hora da última atualização
+      required:
+      - audio_url
+      - category
+      - category_name
+      - created_at
+      - created_by
+      - created_by_username
+      - id
+      - image
+      - image_url
+      - name
+      - updated_at
+    PictogramRequest:
+      type: object
+      description: Serializer para Pictogram
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome do pictograma
+          description: Nome do pictograma
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          title: Descrição
+          description: Descrição adicional do pictograma
+        category:
+          type: integer
+          title: Categoria
+          description: ID da categoria do cotidiano
+        image:
+          type: string
+          format: binary
+          title: Imagem do pictograma
+          description: Arquivo de imagem do pictograma
+        audio:
+          type: string
+          format: binary
+          nullable: true
+          title: Áudio do pictograma
+          description: Arquivo de áudio do pictograma (opcional)
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o pictograma está ativo
+      required:
+      - category
+      - image
+      - name
+    RelationshipTypeEnum:
+      enum:
+      - FAMILY
+      - PROFESSIONAL
+      - FRIEND
+      - VOLUNTEER
+      - OTHER
+      type: string
+      description: |-
+        * `FAMILY` - Familiar
+        * `PROFESSIONAL` - Profissional
+        * `FRIEND` - Amigo
+        * `VOLUNTEER` - Voluntário
+        * `OTHER` - Outros
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+servers:
+- url: https://janioalexandre.pythonanywhere.com
+  description: Produção
+- url: http://localhost:8000
+  description: Desenvolvimento
+tags:
+- name: EverydayCategory
+  description: Operações relacionadas às categorias do cotidiano
+- name: Pictogram
+  description: Operações relacionadas aos pictogramas
+- name: Patient
+  description: Operações relacionadas aos pacientes
+- name: Caregiver
+  description: Operações relacionadas aos cuidadores

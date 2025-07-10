@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from ..models import Person, PatientCaregiverRelationship
 from ..serializers import (
     PatientSerializer, 
@@ -19,11 +19,29 @@ class PatientCreateListView(generics.ListCreateAPIView):
     
     def get_queryset(self):
         """Retorna apenas pessoas que são pacientes"""
-        return Person.objects.filter(is_patient=True)
+        queryset = Person.objects.filter(is_patient=True)
+        
+        # Filtro por CPF se fornecido
+        cpf = self.request.query_params.get('cpf', None)
+        if cpf:
+            # Remove formatação do CPF para busca flexível
+            cpf_cleaned = ''.join(filter(str.isdigit, cpf))
+            queryset = queryset.filter(cpf=cpf_cleaned)
+        
+        return queryset
     
     @extend_schema(
         summary='Listar Pacientes',
-        description='Utilizado para listar todos os pacientes cadastrados no sistema'
+        description='Utilizado para listar todos os pacientes cadastrados no sistema. Opcionalmente pode filtrar por CPF usando o parâmetro ?cpf=12345678901',
+        parameters=[
+            OpenApiParameter(
+                name='cpf',
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description='CPF do paciente para filtrar (apenas números, sem formatação)'
+            )
+        ]
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)

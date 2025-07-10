@@ -1,9 +1,21 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from .base import BaseModel
 
 
 class Person(BaseModel):
+    
+    # Relacionamento com usuário do sistema
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        verbose_name="Usuário do Sistema",
+        help_text="Usuário associado a esta pessoa para login no sistema",
+        related_name='person'
+    )
     
     # Dados básicos (obrigatórios)
     name = models.CharField(        max_length=200,

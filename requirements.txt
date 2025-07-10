@@ -1,8 +1,8 @@
+# Base dependencies
+setuptools>=65.0.0
+
 # Django Framework
 Django==5.2.3
-
-# Database
-psycopg2-binary==2.9.7  # PostgreSQL (comentar se não usar)
 
 # API Development
 djangorestframework==3.16.0

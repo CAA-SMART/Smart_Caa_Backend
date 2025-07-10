@@ -17,3 +17,7 @@ from .patient_caregiver_relationship import (
     PatientCaregiverRelationshipDetailView,
     PatientCaregiverRelationshipInactivateView
 )
+from .person import (
+    GetPersonByUserIdView,
+    GetPersonByCpfView
+)

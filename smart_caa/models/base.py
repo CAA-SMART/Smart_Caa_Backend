@@ -9,6 +9,7 @@ class BaseModel(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name="%(class)s_created",
         verbose_name="Criado por",
         help_text="Usuário que criou o registro"
     )
