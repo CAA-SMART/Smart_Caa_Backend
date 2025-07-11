@@ -7,7 +7,8 @@ paths:
   /api/caregivers/:
     get:
       operationId: api_caregivers_list
-      description: Utilizado para listar todos os cuidadores cadastrados no sistema
+      description: Utilizado para listar todos os cuidadores cadastrados no sistema.
+        **Requer autenticação.**
       summary: Listar Cuidadores
       parameters:
       - name: page
@@ -30,7 +31,7 @@ paths:
     post:
       operationId: api_caregivers_create
       description: Utilizado para cadastrar um novo cuidador. Se o CPF já existir,
-        a pessoa será marcada também como cuidador.
+        a pessoa será marcada também como cuidador. Este endpoint não requer autenticação.
       summary: Cadastrar Cuidador
       tags:
       - Caregiver
@@ -48,6 +49,7 @@ paths:
         required: true
       security:
       - jwtAuth: []
+      - {}
       responses:
         '201':
           content:
@@ -346,23 +348,15 @@ paths:
     get:
       operationId: api_patients_list
       description: Utilizado para listar todos os pacientes cadastrados no sistema.
-        Opcionalmente pode filtrar por CPF usando o parâmetro ?cpf=12345678901
+        Opcionalmente pode filtrar por CPF usando o parâmetro ?cpf=12345678901. **Requer
+        autenticação.**
       summary: Listar Pacientes
       parameters:
       - in: query
         name: cpf
         schema:
           type: string
-        description: CPF do paciente para filtrar (aceita com ou sem formatação)
-        examples:
-          CPFSemFormatação:
-            value: '12345678901'
-            summary: CPF sem formatação
-            description: CPF apenas com números
-          CPFComFormatação:
-            value: 123.456.789-01
-            summary: CPF com formatação
-            description: CPF com pontos e traço
+        description: CPF do paciente para filtrar (apenas números, sem formatação)
       - name: page
         required: false
         in: query
@@ -383,7 +377,7 @@ paths:
     post:
       operationId: api_patients_create
       description: Utilizado para cadastrar um novo paciente. Se o CPF já existir,
-        a pessoa será marcada também como paciente.
+        a pessoa será marcada também como paciente. Este endpoint não requer autenticação.
       summary: Cadastrar Paciente
       tags:
       - Patient
@@ -401,6 +395,7 @@ paths:
         required: true
       security:
       - jwtAuth: []
+      - {}
       responses:
         '201':
           content:

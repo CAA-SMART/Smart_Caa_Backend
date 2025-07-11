@@ -13,7 +13,7 @@ class CaregiverCreateListView(generics.ListCreateAPIView):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create' or self.request.method == 'POST':
+        if self.request.method == 'POST':
             # Cadastro de cuidador é aberto (não precisa estar logado)
             permission_classes = [AllowAny]
         else:
