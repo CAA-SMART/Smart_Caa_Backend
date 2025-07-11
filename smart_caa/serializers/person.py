@@ -335,6 +335,12 @@ class PatientSerializer(serializers.ModelSerializer):
             is_active=True
         )
         
+        # Verifica se há um usuário autenticado
+        request = self.context.get('request')
+        created_by = None
+        if request and hasattr(request, 'user') and request.user.is_authenticated:
+            created_by = request.user
+        
         # Cria as vinculações
         patient_pictograms = []
         for pictogram in default_pictograms:
@@ -342,7 +348,7 @@ class PatientSerializer(serializers.ModelSerializer):
                 PatientPictogram(
                     patient=patient,
                     pictogram=pictogram,
-                    created_by=getattr(self.context.get('request'), 'user', None)
+                    created_by=created_by
                 )
             )
         
