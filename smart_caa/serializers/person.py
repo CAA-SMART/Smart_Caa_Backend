@@ -301,6 +301,9 @@ class PatientSerializer(serializers.ModelSerializer):
                 person.user = user
                 person.save()
                 
+                # Vincula pictogramas padrão automaticamente
+                self._link_default_pictograms(person)
+                
                 return person
             else:
                 # Pessoa não existe, cria nova
@@ -313,7 +316,39 @@ class PatientSerializer(serializers.ModelSerializer):
             # Cria nova pessoa como paciente
             validated_data['is_patient'] = True
             validated_data['user'] = user
-            return super().create(validated_data)
+            person = super().create(validated_data)
+            
+            # Vincula pictogramas padrão automaticamente
+            self._link_default_pictograms(person)
+            
+            return person
+    
+    def _link_default_pictograms(self, patient):
+        """
+        Vincula automaticamente os pictogramas marcados como padrão ao novo paciente
+        """
+        from ..models import Pictogram, PatientPictogram
+        
+        # Busca pictogramas marcados como padrão
+        default_pictograms = Pictogram.objects.filter(
+            is_default=True,
+            is_active=True
+        )
+        
+        # Cria as vinculações
+        patient_pictograms = []
+        for pictogram in default_pictograms:
+            patient_pictograms.append(
+                PatientPictogram(
+                    patient=patient,
+                    pictogram=pictogram,
+                    created_by=getattr(self.context.get('request'), 'user', None)
+                )
+            )
+        
+        # Insere todos de uma vez (bulk_create para performance)
+        if patient_pictograms:
+            PatientPictogram.objects.bulk_create(patient_pictograms)
     
     def _validate_existing_person(self, person, validated_data):
         """Valida se dados básicos são consistentes com pessoa existente"""

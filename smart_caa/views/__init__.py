@@ -5,7 +5,11 @@ from .patient import (
     PatientRetrieveUpdateDestroyView,
     PatientCaregiversListView,
     PatientCaregiverCreateView,
-    PatientCaregiverDetailView
+    PatientCaregiverDetailView,
+    PatientPictogramsListView,
+    PatientPictogramCreateView,
+    PatientPictogramDestroyView,
+    PatientAvailablePictogramsView
 )
 from .caregiver import (
     CaregiverCreateListView, 

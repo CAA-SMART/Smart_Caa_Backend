@@ -1,0 +1,270 @@
+@baseUrl = http://localhost:8000
+@authToken = {{login.response.body.access}}
+
+### Fazer login para obter token de autenticação
+# @name login
+POST {{baseUrl}}/authentication/token
+Content-Type: application/json
+
+{
+    "username": "janioalexandre",
+    "password": "123456"
+}
+
+###
+# PACIENTES - CRUD BÁSICO
+###
+
+### Cadastrar Paciente (SEM AUTENTICAÇÃO - Público)
+# @name cadastrarPaciente
+POST {{baseUrl}}/api/patients/
+Content-Type: application/json
+
+{
+    "name": "João Silva Teste",
+    "cpf": "12345678901",
+    "email": "joao.teste@gmail.com",
+    "phone": "(11) 99999-1111",
+    "password": "senhaSegura123",
+    "cid": "F84.0",
+    "colors": "Azul, Verde",
+    "sounds": "Música clássica",
+    "smells": "Lavanda",
+    "hobbies": "Pintura, Xadrez",
+    "postal_code": "01234-567",
+    "city": "São Paulo",
+    "state": "SP",
+    "district": "Centro",
+    "street": "Rua das Flores",
+    "number": "123",
+    "complement": "Apto 45"
+}
+
+### Listar Pacientes (COM AUTENTICAÇÃO)
+# @name listarPacientes
+GET {{baseUrl}}/api/patients/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Listar Pacientes com Filtro por CPF
+# @name listarPacientesPorCPF
+GET {{baseUrl}}/api/patients/?cpf=12345678901
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Obter Paciente Específico
+# @name obterPaciente
+GET {{baseUrl}}/api/patients/1/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Atualizar Paciente Completo
+# @name atualizarPaciente
+PUT {{baseUrl}}/api/patients/1/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "name": "João Silva Atualizado",
+    "cpf": "12345678901",
+    "email": "joao.atualizado@gmail.com",
+    "phone": "(11) 99999-2222",
+    "cid": "F84.1",
+    "colors": "Azul, Vermelho",
+    "sounds": "Jazz",
+    "smells": "Eucalipto",
+    "hobbies": "Música, Leitura"
+}
+
+### Atualizar Paciente Parcial
+# @name atualizarPacienteParcial
+PATCH {{baseUrl}}/api/patients/1/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "colors": "Verde, Amarelo",
+    "hobbies": "Natação, Caminhada"
+}
+
+###
+# PICTOGRAMAS DO PACIENTE
+###
+
+### Listar Pictogramas do Paciente
+# @name listarPictogramasPaciente
+GET {{baseUrl}}/api/patients/1/pictograms/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Vincular Pictograma ao Paciente
+# @name vincularPictograma
+POST {{baseUrl}}/api/patients/1/pictograms/create/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "pictogram": 1
+}
+
+### Vincular Outro Pictograma ao Paciente
+# @name vincularPictograma2
+POST {{baseUrl}}/api/patients/1/pictograms/create/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "pictogram": 2
+}
+
+### Tentar Vincular Pictograma Já Ativo (DEVE DAR ERRO)
+# @name vincularPictogramaDuplicado
+POST {{baseUrl}}/api/patients/1/pictograms/create/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "pictogram": 1
+}
+
+### Desvincular Pictograma do Paciente (Inativar)
+# @name desvincularPictograma
+DELETE {{baseUrl}}/api/patients/1/pictograms/1/destroy/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+# CUIDADORES DO PACIENTE
+###
+
+### Listar Cuidadores do Paciente
+# @name listarCuidadoresPaciente
+GET {{baseUrl}}/api/patients/1/caregivers/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Vincular Cuidador ao Paciente
+# @name vincularCuidador
+POST {{baseUrl}}/api/patients/1/caregivers/create/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "caregiver": 1,
+    "relationship_type": "FAMILY",
+    "start_date": "2024-01-01"
+}
+
+###
+# TESTES DE CADASTRO DE MÚLTIPLOS PACIENTES
+###
+
+### Cadastrar Segundo Paciente
+# @name cadastrarPaciente2
+POST {{baseUrl}}/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Maria Santos",
+    "cpf": "98765432109",
+    "email": "maria.santos@gmail.com",
+    "phone": "(11) 88888-2222",
+    "password": "senhaSegura456",
+    "cid": "F80.0",
+    "colors": "Rosa, Lilás",
+    "sounds": "Sons da natureza",
+    "smells": "Rosas",
+    "hobbies": "Jardinagem, Yoga"
+}
+
+### Cadastrar Terceiro Paciente
+# @name cadastrarPaciente3
+POST {{baseUrl}}/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Pedro Oliveira",
+    "cpf": "11122233344",
+    "email": "pedro.oliveira@gmail.com",
+    "phone": "(11) 77777-3333",
+    "password": "senhaSegura789",
+    "cid": "F90.0",
+    "colors": "Azul, Branco",
+    "sounds": "Instrumentais",
+    "smells": "Menta",
+    "hobbies": "Futebol, Videogames"
+}
+
+###
+# TESTES DE ERRO E VALIDAÇÃO
+###
+
+### Tentar Cadastrar Paciente com CPF Já Existente
+# @name cadastrarPacienteCPFDuplicado
+POST {{baseUrl}}/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Outro Nome",
+    "cpf": "12345678901",
+    "email": "outro@gmail.com",
+    "phone": "(11) 55555-5555",
+    "password": "outraSenha123"
+}
+
+### Tentar Cadastrar Paciente com Email Já Existente
+# @name cadastrarPacienteEmailDuplicado
+POST {{baseUrl}}/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Outro Nome",
+    "cpf": "55566677788",
+    "email": "joao.teste@gmail.com",
+    "phone": "(11) 44444-4444",
+    "password": "outraSenha456"
+}
+
+### Tentar Cadastrar Paciente com CPF Inválido
+# @name cadastrarPacienteCPFInvalido
+POST {{baseUrl}}/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Nome Teste",
+    "cpf": "11111111111",
+    "email": "teste@gmail.com",
+    "phone": "(11) 33333-3333",
+    "password": "senhaSegura999"
+}
+
+### Tentar Acessar Endpoint Protegido sem Autenticação
+# @name acessarSemAuth
+GET {{baseUrl}}/api/patients/
+Content-Type: application/json
+
+###
+# BUSCA POR CPF (Endpoint de Pessoa)
+###
+
+### Buscar Pessoa por CPF
+# @name buscarPorCPF
+GET {{baseUrl}}/api/person/cpf/12345678901/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+# TESTES DE PERFORMANCE E LISTAGEM
+###
+
+### Listar Todos os Pacientes (Verificar Pictogramas Padrão Vinculados)
+# @name verificarPictogramasPadrao
+GET {{baseUrl}}/api/patients/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Verificar Pictogramas do Primeiro Paciente (Deve ter pictogramas padrão)
+# @name verificarPictogramasAutomaticos
+GET {{baseUrl}}/api/patients/1/pictograms/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json

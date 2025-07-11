@@ -9,6 +9,10 @@ from .views import (
     PatientCaregiversListView,
     PatientCaregiverCreateView,
     PatientCaregiverDetailView,
+    PatientPictogramsListView,
+    PatientPictogramCreateView,
+    PatientPictogramDestroyView,
+    PatientAvailablePictogramsView,
     CaregiverCreateListView,
     CaregiverRetrieveUpdateDestroyView,
     CaregiverPatientsListView,
@@ -36,6 +40,12 @@ urlpatterns = [
     path('api/patients/<int:patient_id>/caregivers/', PatientCaregiversListView.as_view(), name='patient-caregivers-list'),
     path('api/patients/<int:patient_id>/caregivers/create/', PatientCaregiverCreateView.as_view(), name='patient-caregiver-create'),
     path('api/patients/<int:patient_id>/caregivers/<int:pk>/', PatientCaregiverDetailView.as_view(), name='patient-caregiver-detail'),
+    
+    # Patient-Pictogram relationship endpoints (specific to patient)
+    path('api/patients/<int:patient_id>/pictograms/', PatientPictogramsListView.as_view(), name='patient-pictograms-list'),
+    path('api/patients/<int:patient_id>/pictograms/create/', PatientPictogramCreateView.as_view(), name='patient-pictogram-create'),
+    path('api/patients/<int:patient_id>/pictograms/<int:pk>/destroy/', PatientPictogramDestroyView.as_view(), name='patient-pictogram-destroy'),
+    path('api/patients/<int:patient_id>/pictograms/available/', PatientAvailablePictogramsView.as_view(), name='patient-available-pictograms'),
     
     # Caregiver endpoints
     path('api/caregivers/', CaregiverCreateListView.as_view(), name='caregiver-list-create'),

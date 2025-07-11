@@ -7,3 +7,8 @@ from .patient_caregiver_relationship import (
     CaregiverForPatientSerializer,
     PatientForCaregiverSerializer
 )
+from .patient_pictogram import (
+    PatientPictogramSerializer,
+    PatientPictogramCreateSerializer,
+    PictogramForPatientSerializer
+)

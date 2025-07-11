@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EverydayCategory, Pictogram, Person, PatientCaregiverRelationship
+from .models import EverydayCategory, Pictogram, Person, PatientCaregiverRelationship, PatientPictogram
 
 
 class PictogramInline(admin.TabularInline):
@@ -147,4 +147,42 @@ class PatientCaregiverRelationshipAdmin(admin.ModelAdmin):
         """Otimiza as consultas incluindo relacionamentos"""
         return super().get_queryset(request).select_related(
             'patient', 'caregiver', 'created_by', 'inactivated_by'
+        )
+
+
+@admin.register(PatientPictogram)
+class PatientPictogramAdmin(admin.ModelAdmin):
+    list_display = [
+        'patient', 'pictogram', 'is_active', 'created_by', 'created_at'
+    ]
+    search_fields = [
+        'patient__name', 'patient__cpf', 
+        'pictogram__name', 'pictogram__category__name'
+    ]
+    list_filter = [
+        'is_active', 'created_at', 'created_by',
+        'pictogram__category', 'pictogram__is_default'
+    ]
+    readonly_fields = ['created_by', 'created_at', 'updated_at']
+    ordering = ['-created_at', 'patient__name']
+    
+    fieldsets = (
+        ('Vinculação', {
+            'fields': ('patient', 'pictogram', 'is_active')
+        }),
+        ('Informações do Sistema', {
+            'fields': ('created_by', 'created_at', 'updated_at', 'inactivated_at', 'inactivated_by'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # Se é um novo objeto
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        """Otimiza as consultas incluindo relacionamentos"""
+        return super().get_queryset(request).select_related(
+            'patient', 'pictogram', 'pictogram__category', 'created_by', 'inactivated_by'
         )

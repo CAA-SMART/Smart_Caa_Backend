@@ -3,12 +3,16 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from ..models import Person, PatientCaregiverRelationship
+from ..models import Person, PatientCaregiverRelationship, PatientPictogram, Pictogram
 from ..serializers import (
     PatientSerializer, 
     CaregiverForPatientSerializer,
-    PatientCaregiverRelationshipSerializer
+    PatientCaregiverRelationshipSerializer,
+    PatientPictogramSerializer,
+    PatientPictogramCreateSerializer,
+    PictogramForPatientSerializer
 )
 
 
@@ -198,3 +202,118 @@ class PatientCaregiverDetailView(generics.RetrieveUpdateAPIView):
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
+
+
+@extend_schema(tags=['Patient'])
+class PatientPictogramsListView(generics.ListAPIView):
+    """
+    View para listar todos os pictogramas de um paciente específico
+    """
+    serializer_class = PatientPictogramSerializer
+    permission_classes = (IsAuthenticated,)
+    
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        return PatientPictogram.objects.filter(
+            patient_id=patient_id,
+            is_active=True
+        ).select_related('pictogram', 'pictogram__category', 'created_by')
+    
+    @extend_schema(
+        summary='Listar Pictogramas do Paciente',
+        description='Utilizado para listar todos os pictogramas vinculados a um paciente específico'
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+@extend_schema(tags=['Patient'])
+class PatientPictogramCreateView(generics.CreateAPIView):
+    """
+    View para vincular um pictograma a um paciente
+    """
+    serializer_class = PatientPictogramCreateSerializer
+    permission_classes = (IsAuthenticated,)
+    
+    @extend_schema(
+        summary='Vincular Pictograma ao Paciente',
+        description='Utilizado para criar um vínculo entre um paciente e um pictograma'
+    )
+    def post(self, request, *args, **kwargs):
+        # Adiciona o patient_id da URL aos dados
+        patient_id = self.kwargs['patient_id']
+        data = request.data.copy()
+        data['patient'] = patient_id
+        
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+@extend_schema(tags=['Patient'])
+class PatientPictogramDestroyView(generics.DestroyAPIView):
+    """
+    View para desvincular um pictograma de um paciente (inativar)
+    """
+    serializer_class = PatientPictogramSerializer
+    permission_classes = (IsAuthenticated,)
+    
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        return PatientPictogram.objects.filter(
+            patient_id=patient_id,
+            is_active=True
+        )
+    
+    @extend_schema(
+        summary='Desvincular Pictograma do Paciente',
+        description='Utilizado para desvincular um pictograma de um paciente (marca como inativo)'
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        # Ao invés de deletar, marca como inativo
+        instance.is_active = False
+        instance.inactivated_by = request.user
+        instance.inactivated_at = timezone.now()
+        instance.save()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@extend_schema(tags=['Patient'])
+class PatientAvailablePictogramsView(generics.ListAPIView):
+    """
+    View para listar pictogramas disponíveis para vincular ao paciente
+    """
+    serializer_class = PictogramForPatientSerializer
+    permission_classes = (IsAuthenticated,)
+    
+    def get_queryset(self):
+        patient_id = self.kwargs['patient_id']
+        
+        # Pictogramas já vinculados e ativos ao paciente
+        linked_pictograms = PatientPictogram.objects.filter(
+            patient_id=patient_id,
+            is_active=True
+        ).values_list('pictogram_id', flat=True)
+        
+        # Retorna pictogramas ativos que não estão vinculados ao paciente
+        return Pictogram.objects.filter(
+            is_active=True
+        ).exclude(
+            id__in=linked_pictograms
+        ).select_related('category')
+    
+    @extend_schema(
+        summary='Listar Pictogramas Disponíveis',
+        description='Utilizado para listar pictogramas disponíveis para vincular ao paciente'
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
