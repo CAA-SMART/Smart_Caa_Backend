@@ -15,7 +15,19 @@ from ..serializers import (
 @extend_schema(tags=['Patient'])
 class PatientCreateListView(generics.ListCreateAPIView):
     serializer_class = PatientSerializer
-    permission_classes = (IsAuthenticated,)
+    
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        """
+        if self.action == 'create' or self.request.method == 'POST':
+            # Cadastro de paciente é aberto (não precisa estar logado)
+            permission_classes = [AllowAny]
+        else:
+            # Listagem de pacientes requer autenticação
+            permission_classes = [IsAuthenticated]
+        
+        return [permission() for permission in permission_classes]
     
     def get_queryset(self):
         """Retorna apenas pessoas que são pacientes"""
@@ -32,7 +44,7 @@ class PatientCreateListView(generics.ListCreateAPIView):
     
     @extend_schema(
         summary='Listar Pacientes',
-        description='Utilizado para listar todos os pacientes cadastrados no sistema. Opcionalmente pode filtrar por CPF usando o parâmetro ?cpf=12345678901',
+        description='Utilizado para listar todos os pacientes cadastrados no sistema. Opcionalmente pode filtrar por CPF usando o parâmetro ?cpf=12345678901. **Requer autenticação.**',
         parameters=[
             OpenApiParameter(
                 name='cpf',
@@ -48,13 +60,18 @@ class PatientCreateListView(generics.ListCreateAPIView):
     
     @extend_schema(
         summary='Cadastrar Paciente',
-        description='Utilizado para cadastrar um novo paciente. Se o CPF já existir, a pessoa será marcada também como paciente.'
+        description='Utilizado para cadastrar um novo paciente. Se o CPF já existir, a pessoa será marcada também como paciente. Este endpoint não requer autenticação.'
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
     
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        # Se o usuário estiver autenticado, usar como created_by
+        if self.request.user.is_authenticated:
+            serializer.save(created_by=self.request.user)
+        else:
+            # Se não estiver autenticado, salvar sem created_by
+            serializer.save()
 
 
 @extend_schema(tags=['Patient'])

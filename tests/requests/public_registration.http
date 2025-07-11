@@ -1,0 +1,97 @@
+### Teste de Cadastro Sem Autenticação
+### Arquivo: tests/requests/public_registration.http
+
+### 1. Cadastrar Paciente (SEM AUTENTICAÇÃO)
+POST http://127.0.0.1:8000/api/patients/
+Content-Type: application/json
+
+{
+    "name": "João Silva Paciente",
+    "cpf": "12345678901",
+    "email": "joao.paciente@teste.com",
+    "phone": "(11) 99999-1111",
+    "password": "senhaSegura123",
+    "cid": "F84.0",
+    "colors": "Azul, Verde",
+    "sounds": "Música clássica",
+    "smells": "Lavanda",
+    "hobbies": "Pintura, Xadrez"
+}
+
+### 2. Cadastrar Cuidador (SEM AUTENTICAÇÃO)
+POST http://127.0.0.1:8000/api/caregivers/
+Content-Type: application/json
+
+{
+    "name": "Maria Santos Cuidadora",
+    "cpf": "98765432109",
+    "email": "maria.cuidadora@teste.com",
+    "phone": "(11) 88888-2222",
+    "password": "senhaSegura456",
+    "profession": "Enfermeira"
+}
+
+### 3. Cadastrar Pessoa que é Paciente e Cuidador (SEM AUTENTICAÇÃO)
+POST http://127.0.0.1:8000/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Ana Costa Dual",
+    "cpf": "11122233344",
+    "email": "ana.dual@teste.com",
+    "phone": "(11) 77777-3333",
+    "password": "senhaSegura789",
+    "cid": "F80.0",
+    "profession": "Psicóloga",
+    "colors": "Rosa, Amarelo",
+    "sounds": "Sons da natureza",
+    "smells": "Café",
+    "hobbies": "Leitura, Yoga"
+}
+
+### 4. Tentar listar pacientes (DEVE DAR ERRO 401 - sem autenticação)
+GET http://127.0.0.1:8000/api/patients/
+
+### 5. Tentar listar cuidadores (DEVE DAR ERRO 401 - sem autenticação)
+GET http://127.0.0.1:8000/api/caregivers/
+
+### 6. Login com usuário criado automaticamente
+POST http://127.0.0.1:8000/authentication/token
+Content-Type: application/json
+
+{
+    "username": "12345678901",
+    "password": "senhaSegura123"
+}
+
+### 7. Listar pacientes (COM AUTENTICAÇÃO)
+GET http://127.0.0.1:8000/api/patients/
+Authorization: Bearer {{access_token}}
+
+### 8. Listar cuidadores (COM AUTENTICAÇÃO)
+GET http://127.0.0.1:8000/api/caregivers/
+Authorization: Bearer {{access_token}}
+
+### 9. Teste de erro - CPF já cadastrado
+POST http://127.0.0.1:8000/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Outro Nome",
+    "cpf": "12345678901",
+    "email": "outro@teste.com",
+    "phone": "(11) 55555-5555",
+    "password": "outraSenha123"
+}
+
+### 10. Teste de erro - Email já cadastrado
+POST http://127.0.0.1:8000/api/patients/
+Content-Type: application/json
+
+{
+    "name": "Outro Nome",
+    "cpf": "55566677788",
+    "email": "joao.paciente@teste.com",
+    "phone": "(11) 44444-4444",
+    "password": "outraSenha456"
+}
