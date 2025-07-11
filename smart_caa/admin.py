@@ -5,7 +5,7 @@ from .models import EverydayCategory, Pictogram, Person, PatientCaregiverRelatio
 class PictogramInline(admin.TabularInline):
     model = Pictogram
     extra = 0
-    fields = ['name', 'is_active', 'image', 'audio']
+    fields = ['name', 'is_active', 'is_default', 'image', 'audio']
     readonly_fields = []
     
 
@@ -26,15 +26,15 @@ class EverydayCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Pictogram)
 class PictogramAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'is_active', 'created_by', 'created_at']
+    list_display = ['name', 'category', 'is_default', 'is_active', 'created_by', 'created_at']
     search_fields = ['name', 'description', 'category__name', 'created_by__username']
-    list_filter = ['is_active', 'category', 'created_at', 'created_by']
+    list_filter = ['is_default', 'is_active', 'category', 'created_at', 'created_by']
     readonly_fields = ['created_by', 'created_at', 'updated_at']
     ordering = ['category', 'name']
     
     fieldsets = (
         ('Informações Básicas', {
-            'fields': ('name', 'category', 'description', 'is_active')
+            'fields': ('name', 'category', 'description', 'is_active', 'is_default')
         }),
         ('Arquivos', {
             'fields': ('image', 'audio')

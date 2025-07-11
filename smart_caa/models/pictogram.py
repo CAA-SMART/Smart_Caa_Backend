@@ -40,6 +40,12 @@ class Pictogram(BaseModel):
         help_text="Descrição adicional do pictograma"
     )
     
+    is_default = models.BooleanField(
+        default=False,
+        verbose_name="Pictograma padrão",
+        help_text="Se marcado, este pictograma será automaticamente vinculado a novos pacientes"
+    )
+    
     class Meta:
         verbose_name = "Pictograma"
         verbose_name_plural = "Pictogramas"
