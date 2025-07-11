@@ -119,6 +119,33 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Configurações de segurança para arquivos
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Tipos de arquivo permitidos para upload
+ALLOWED_MEDIA_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg', '.mp3', '.mp4', '.wav', '.m4a']
+
+# Configurações específicas para PythonAnywhere
+import platform
+if 'pythonanywhere' in platform.node().lower() or not DEBUG:
+    # Configurações otimizadas para produção
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+    SECURE_REFERRER_POLICY = None
+    
+    # Permitir servir arquivos de mídia via Django em produção
+    MEDIA_SERVE_VIA_DJANGO = True
+    
+    # Headers de cache para arquivos de mídia
+    MEDIA_CACHE_HEADERS = {
+        'Cache-Control': 'public, max-age=3600',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'SAMEORIGIN',
+    }
+else:
+    # Configurações de desenvolvimento
+    MEDIA_SERVE_VIA_DJANGO = False
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
