@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
@@ -14,7 +14,7 @@ class GetPersonByUserIdView(APIView):
     """
     View para obter a pessoa associada a um usuário específico pelo ID do usuário
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)  # Removida autenticação obrigatória
     
     @extend_schema(
         summary='Obter Pessoa por ID do Usuário',
@@ -50,7 +50,7 @@ class GetPersonByCpfView(APIView):
     """
     View para buscar pessoa pelo CPF e ver se tem usuário associado
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)  # Removida autenticação obrigatória
     
     @extend_schema(
         summary='Buscar Pessoa por CPF',
