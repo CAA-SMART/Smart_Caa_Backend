@@ -66,12 +66,22 @@ class GetPersonByCpfView(APIView):
         cpf_numbers = ''.join(filter(str.isdigit, cpf))
         
         try:
-            # Busca a pessoa pelo CPF (com ou sem formatação)
-            person = Person.objects.filter(cpf__contains=cpf_numbers).first()
+            # Busca a pessoa pelo CPF de forma exata
+            # Primeiro tenta busca exata pelos números (sem formatação)
+            person = Person.objects.filter(cpf=cpf_numbers).first()
+            
+            # Se não encontrar, tenta busca exata com a formatação original
+            if not person:
+                person = Person.objects.filter(cpf=cpf).first()
             
             if not person:
                 return Response(
-                    {'detail': f'Pessoa com CPF {cpf} não encontrada.'},
+                    {
+                        'detail': f'Pessoa com CPF {cpf} não encontrada.',
+                        'cpf_pesquisado': cpf,
+                        'cpf_numerico': cpf_numbers,
+                        'debug_info': 'Busca exata apenas - sem busca parcial'
+                    },
                     status=status.HTTP_404_NOT_FOUND
                 )
             
@@ -95,11 +105,15 @@ class GetPersonByCpfView(APIView):
             return Response(response_data)
             
         except Exception as e:
+            # Adiciona informações de debug para produção
+            all_cpfs = Person.objects.values_list('cpf', flat=True)[:10]  # Primeiros 10 CPFs para debug
             return Response(
                 {
                     'detail': f'Erro ao buscar pessoa: {str(e)}',
                     'cpf_pesquisado': cpf,
-                    'cpf_numerico': cpf_numbers
+                    'cpf_numerico': cpf_numbers,
+                    'debug_cpfs_existentes': list(all_cpfs),
+                    'total_pessoas': Person.objects.count()
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
