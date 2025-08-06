@@ -175,8 +175,10 @@ class PatientSerializer(serializers.ModelSerializer):
     
     password = serializers.CharField(
         write_only=True,
+        required=False,  # Campo opcional no formulário
+        allow_blank=True,  # Permite valor vazio
         style={'input_type': 'password'},
-        help_text="Senha para o usuário do sistema (mínimo 8 caracteres)",
+        help_text="Senha para o usuário do sistema (mínimo 8 caracteres) - OBRIGATÓRIO se a pessoa não tiver usuário associado",
         min_length=8
     )
     
@@ -262,9 +264,32 @@ class PatientSerializer(serializers.ModelSerializer):
             }
         }
     
+    def validate(self, data):
+        """Validação customizada para verificar se senha é necessária"""
+        cpf = data.get('cpf')
+        password = data.get('password')
+        
+        if cpf:
+            # Remove formatação do CPF para busca
+            cpf_numbers = ''.join(filter(str.isdigit, cpf))
+            
+            # Verifica se pessoa já existe
+            person = Person.objects.filter(
+                cpf__regex=r'[^0-9]*' + ''.join(f'[^0-9]*{d}' for d in cpf_numbers) + '[^0-9]*'
+            ).first()
+            
+            # Se pessoa não existe OU existe mas não tem usuário, senha é obrigatória
+            if not person or not person.user:
+                if not password or not password.strip():
+                    raise serializers.ValidationError({
+                        'password': 'É obrigatório informar uma senha para criar o usuário.'
+                    })
+        
+        return data
+
     def create(self, validated_data):
-        # Remove a senha dos dados validados para não tentar salvar no modelo Person
-        password = validated_data.pop('password')
+        # Remove a senha dos dados validados (pode estar vazia ou não existir)
+        password = validated_data.pop('password', None)
         cpf = validated_data.get('cpf')
         email = validated_data.get('email')
         name = validated_data.get('name')
@@ -280,16 +305,24 @@ class PatientSerializer(serializers.ModelSerializer):
             ).first()
             
             if person:
-                # Se a pessoa já tem um usuário associado, retorna erro
+                # Se a pessoa já tem um usuário associado, não cria novo usuário
                 if person.user:
-                    raise serializers.ValidationError({
-                        'cpf': 'Esta pessoa já possui um usuário associado.'
-                    })
+                    # Apenas marca como paciente e atualiza dados
+                    for field, value in validated_data.items():
+                        setattr(person, field, value)
+                    
+                    person.is_patient = True
+                    person.save()
+                    
+                    # Vincula pictogramas padrão automaticamente
+                    self._link_default_pictograms(person)
+                    
+                    return person
                 
-                # Valida consistência dos dados básicos
+                # Se não tem usuário, valida consistência e cria usuário
                 self._validate_existing_person(person, validated_data)
                 
-                # Cria o usuário usando a função utilitária
+                # Cria o usuário (senha já foi validada no método validate)
                 user = create_user_for_person(cpf, email, name, password)
                 
                 # Atualiza dados da pessoa
@@ -310,7 +343,7 @@ class PatientSerializer(serializers.ModelSerializer):
                 raise Person.DoesNotExist()
             
         except Person.DoesNotExist:
-            # Cria o usuário usando a função utilitária
+            # Cria o usuário (senha já foi validada no método validate)
             user = create_user_for_person(cpf, email, name, password)
             
             # Cria nova pessoa como paciente
@@ -400,8 +433,10 @@ class CaregiverSerializer(serializers.ModelSerializer):
     
     password = serializers.CharField(
         write_only=True,
+        required=False,  # Campo opcional no formulário
+        allow_blank=True,  # Permite valor vazio
         style={'input_type': 'password'},
-        help_text="Senha para o usuário do sistema (mínimo 8 caracteres)",
+        help_text="Senha para o usuário do sistema (mínimo 8 caracteres) - OBRIGATÓRIO se a pessoa não tiver usuário associado",
         min_length=8
     )
     
@@ -471,9 +506,32 @@ class CaregiverSerializer(serializers.ModelSerializer):
             }
         }
     
+    def validate(self, data):
+        """Validação customizada para verificar se senha é necessária"""
+        cpf = data.get('cpf')
+        password = data.get('password')
+        
+        if cpf:
+            # Remove formatação do CPF para busca
+            cpf_numbers = ''.join(filter(str.isdigit, cpf))
+            
+            # Verifica se pessoa já existe
+            person = Person.objects.filter(
+                cpf__regex=r'[^0-9]*' + ''.join(f'[^0-9]*{d}' for d in cpf_numbers) + '[^0-9]*'
+            ).first()
+            
+            # Se pessoa não existe OU existe mas não tem usuário, senha é obrigatória
+            if not person or not person.user:
+                if not password or not password.strip():
+                    raise serializers.ValidationError({
+                        'password': 'É obrigatório informar uma senha para criar o usuário.'
+                    })
+        
+        return data
+
     def create(self, validated_data):
-        # Remove a senha dos dados validados para não tentar salvar no modelo Person
-        password = validated_data.pop('password')
+        # Remove a senha dos dados validados (pode estar vazia ou não existir)
+        password = validated_data.pop('password', None)
         cpf = validated_data.get('cpf')
         email = validated_data.get('email')
         name = validated_data.get('name')
@@ -489,19 +547,24 @@ class CaregiverSerializer(serializers.ModelSerializer):
             ).first()
             
             if person:
-                # Se a pessoa já tem um usuário associado, retorna erro
+                # Se a pessoa já tem um usuário associado, não cria novo usuário
                 if person.user:
-                    raise serializers.ValidationError({
-                        'cpf': 'Esta pessoa já possui um usuário associado.'
-                    })
+                    # Apenas marca como cuidador e atualiza dados
+                    for field, value in validated_data.items():
+                        setattr(person, field, value)
+                    
+                    person.is_caregiver = True
+                    person.save()
+                    
+                    return person
                 
-                # Valida consistência dos dados básicos
+                # Se não tem usuário, valida consistência e cria usuário
                 self._validate_existing_person(person, validated_data)
                 
-                # Cria o usuário usando a função utilitária
+                # Cria o usuário (senha já foi validada no método validate)
                 user = create_user_for_person(cpf, email, name, password)
                 
-                # Atualiza dados da pessoa (preserva campos específicos do paciente)
+                # Atualiza dados da pessoa
                 for field, value in validated_data.items():
                     setattr(person, field, value)
                     
@@ -516,7 +579,7 @@ class CaregiverSerializer(serializers.ModelSerializer):
                 raise Person.DoesNotExist()
             
         except Person.DoesNotExist:
-            # Cria o usuário usando a função utilitária
+            # Cria o usuário (senha já foi validada no método validate)
             user = create_user_for_person(cpf, email, name, password)
             
             # Cria nova pessoa como cuidador

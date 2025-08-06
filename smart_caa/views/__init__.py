@@ -23,5 +23,7 @@ from .patient_caregiver_relationship import (
 )
 from .person import (
     GetPersonByUserIdView,
-    GetPersonByCpfView
+    GetPersonByCpfView,
+    MakeCaregiverView,
+    MakePatientView
 )

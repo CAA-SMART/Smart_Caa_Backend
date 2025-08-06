@@ -20,7 +20,9 @@ from .views import (
     PatientCaregiverRelationshipDetailView,
     PatientCaregiverRelationshipInactivateView,
     GetPersonByUserIdView,
-    GetPersonByCpfView
+    GetPersonByCpfView,
+    MakeCaregiverView,
+    MakePatientView
 )
 
 urlpatterns = [
@@ -62,4 +64,6 @@ urlpatterns = [
     # Person endpoints
     path('api/user/<int:user_id>/person/', GetPersonByUserIdView.as_view(), name='get-person-by-user-id'),
     path('api/person/cpf/<str:cpf>/', GetPersonByCpfView.as_view(), name='get-person-by-cpf'),
+    path('api/person/<int:person_id>/make-caregiver/', MakeCaregiverView.as_view(), name='make-caregiver'),
+    path('api/person/<int:person_id>/make-patient/', MakePatientView.as_view(), name='make-patient'),
 ]

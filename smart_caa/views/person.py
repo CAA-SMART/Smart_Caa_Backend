@@ -1,5 +1,5 @@
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
@@ -114,6 +114,212 @@ class GetPersonByCpfView(APIView):
                     'cpf_numerico': cpf_numbers,
                     'debug_cpfs_existentes': list(all_cpfs),
                     'total_pessoas': Person.objects.count()
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+@extend_schema(tags=['Person'])
+class MakeCaregiverView(APIView):
+    """
+    View para tornar uma pessoa em cuidador
+    """
+    permission_classes = (IsAuthenticated,)  # Requer autenticação
+    
+    @extend_schema(
+        summary='Tornar Pessoa em Cuidador',
+        description='Atualiza uma pessoa existente para se tornar cuidador. Apenas marca o campo is_caregiver como True. **Requer autenticação.**',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'profession': {
+                        'type': 'string',
+                        'description': 'Profissão ou ocupação do cuidador (opcional)',
+                        'example': 'Enfermeiro'
+                    }
+                },
+                'required': []
+            }
+        },
+        responses={
+            200: {
+                'description': 'Pessoa atualizada para cuidador com sucesso',
+                'content': {
+                    'application/json': {
+                        'type': 'object',
+                        'properties': {
+                            'message': {'type': 'string'},
+                            'is_caregiver': {'type': 'boolean'},
+                            'updated_fields': {'type': 'object'}
+                        }
+                    }
+                }
+            },
+            400: {'description': 'Pessoa já é cuidador ou dados inválidos'},
+            401: {'description': 'Não autenticado'},
+            403: {'description': 'Sem permissão'},
+            404: {'description': 'Pessoa não encontrada'}
+        }
+    )
+    def patch(self, request, person_id):
+        """Torna uma pessoa em cuidador"""
+        try:
+            # Busca a pessoa pelo ID
+            person = get_object_or_404(Person, id=person_id)
+            
+            # Verifica se a pessoa já é cuidador
+            if person.is_caregiver:
+                return Response(
+                    {
+                        'message': 'Esta pessoa já é um cuidador.',
+                        'is_caregiver': True
+                    },
+                    status=status.HTTP_200_OK
+                )
+            
+            # Prepara campos que serão atualizados
+            updated_fields = {}
+            
+            # Atualiza campos opcionais se fornecidos
+            profession = request.data.get('profession')
+            if profession:
+                person.profession = profession
+                updated_fields['profession'] = profession
+            
+            # Marca como cuidador
+            person.is_caregiver = True
+            updated_fields['is_caregiver'] = True
+            person.save()
+            
+            return Response(
+                {
+                    'message': 'Pessoa atualizada para cuidador com sucesso.',
+                    'is_caregiver': True,
+                    'updated_fields': updated_fields
+                },
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return Response(
+                {
+                    'detail': f'Erro ao atualizar pessoa para cuidador: {str(e)}',
+                    'person_id': person_id
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+@extend_schema(tags=['Person'])
+class MakePatientView(APIView):
+    """
+    View para tornar uma pessoa em paciente
+    """
+    permission_classes = (IsAuthenticated,)  # Requer autenticação
+    
+    @extend_schema(
+        summary='Tornar Pessoa em Paciente',
+        description='Atualiza uma pessoa existente para se tornar paciente. Marca o campo is_patient como True e permite atualizar campos específicos do paciente. **Requer autenticação.**',
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'cid': {
+                        'type': 'string',
+                        'description': 'Classificação Internacional de Doenças (opcional)',
+                        'example': 'F84.0'
+                    },
+                    'colors': {
+                        'type': 'string',
+                        'description': 'Cores que o paciente gosta ou tem preferência (opcional)',
+                        'example': 'Azul, Verde, Amarelo'
+                    },
+                    'sounds': {
+                        'type': 'string',
+                        'description': 'Sons, toques ou músicas que o paciente aprecia (opcional)',
+                        'example': 'Música clássica, sons da natureza'
+                    },
+                    'smells': {
+                        'type': 'string',
+                        'description': 'Cheiros que o paciente gosta ou reconhece (opcional)',
+                        'example': 'Lavanda, café, flores'
+                    },
+                    'hobbies': {
+                        'type': 'string',
+                        'description': 'Atividades e hobbies do paciente (opcional)',
+                        'example': 'Pintura, música, jogos'
+                    }
+                },
+                'required': []
+            }
+        },
+        responses={
+            200: {
+                'description': 'Pessoa atualizada para paciente com sucesso',
+                'content': {
+                    'application/json': {
+                        'type': 'object',
+                        'properties': {
+                            'message': {'type': 'string'},
+                            'is_patient': {'type': 'boolean'},
+                            'updated_fields': {'type': 'object'}
+                        }
+                    }
+                }
+            },
+            400: {'description': 'Pessoa já é paciente ou dados inválidos'},
+            401: {'description': 'Não autenticado'},
+            403: {'description': 'Sem permissão'},
+            404: {'description': 'Pessoa não encontrada'}
+        }
+    )
+    def patch(self, request, person_id):
+        """Torna uma pessoa em paciente"""
+        try:
+            # Busca a pessoa pelo ID
+            person = get_object_or_404(Person, id=person_id)
+            
+            # Verifica se a pessoa já é paciente
+            if person.is_patient:
+                return Response(
+                    {
+                        'message': 'Esta pessoa já é um paciente.',
+                        'is_patient': True
+                    },
+                    status=status.HTTP_200_OK
+                )
+            
+            # Prepara campos que serão atualizados
+            updated_fields = {}
+            
+            # Atualiza campos específicos do paciente se fornecidos
+            patient_fields = ['cid', 'colors', 'sounds', 'smells', 'hobbies']
+            for field in patient_fields:
+                value = request.data.get(field)
+                if value:
+                    setattr(person, field, value)
+                    updated_fields[field] = value
+            
+            # Marca como paciente
+            person.is_patient = True
+            updated_fields['is_patient'] = True
+            person.save()
+            
+            return Response(
+                {
+                    'message': 'Pessoa atualizada para paciente com sucesso.',
+                    'is_patient': True,
+                    'updated_fields': updated_fields
+                },
+                status=status.HTTP_200_OK
+            )
+            
+        except Exception as e:
+            return Response(
+                {
+                    'detail': f'Erro ao atualizar pessoa para paciente: {str(e)}',
+                    'person_id': person_id
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
