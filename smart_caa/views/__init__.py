@@ -27,3 +27,12 @@ from .person import (
     MakeCaregiverView,
     MakePatientView
 )
+from .anamnesis import (
+    AnamnesisCreateListView,
+    AnamnesisRetrieveUpdateDestroyView,
+    CaregiverAnamnesisListView,
+    PatientAnamnesisListView,
+    PatientCaregiverAnamnesisView,
+    CreatePatientAnamnesisView,
+    GetAnamnesisView
+)

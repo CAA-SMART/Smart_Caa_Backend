@@ -22,7 +22,14 @@ from .views import (
     GetPersonByUserIdView,
     GetPersonByCpfView,
     MakeCaregiverView,
-    MakePatientView
+    MakePatientView,
+    AnamnesisCreateListView,
+    AnamnesisRetrieveUpdateDestroyView,
+    CaregiverAnamnesisListView,
+    PatientAnamnesisListView,
+    PatientCaregiverAnamnesisView,
+    CreatePatientAnamnesisView,
+    GetAnamnesisView
 )
 
 urlpatterns = [
@@ -66,4 +73,17 @@ urlpatterns = [
     path('api/person/cpf/<str:cpf>/', GetPersonByCpfView.as_view(), name='get-person-by-cpf'),
     path('api/person/<int:person_id>/make-caregiver/', MakeCaregiverView.as_view(), name='make-caregiver'),
     path('api/person/<int:person_id>/make-patient/', MakePatientView.as_view(), name='make-patient'),
+    
+    # Anamnesis endpoints
+    path('api/anamnesis/', AnamnesisCreateListView.as_view(), name='anamnesis-list-create'),
+    path('api/anamnesis/<int:pk>/', AnamnesisRetrieveUpdateDestroyView.as_view(), name='anamnesis-detail'),
+    path('api/anamnesis/get/', GetAnamnesisView.as_view(), name='anamnesis-get-by-ids'),
+    
+    # Caregiver-specific anamnesis endpoints
+    path('api/caregivers/<int:caregiver_id>/anamnesis/', CaregiverAnamnesisListView.as_view(), name='caregiver-anamnesis-list'),
+    
+    # Patient-specific anamnesis endpoints
+    path('api/patients/<int:patient_id>/anamnesis/', PatientAnamnesisListView.as_view(), name='patient-anamnesis-list'),
+    path('api/patients/<int:patient_id>/anamnesis/create/', CreatePatientAnamnesisView.as_view(), name='patient-anamnesis-create'),
+    path('api/patients/<int:patient_id>/anamnesis/caregiver/<int:caregiver_id>/', PatientCaregiverAnamnesisView.as_view(), name='patient-caregiver-anamnesis'),
 ]

@@ -12,3 +12,8 @@ from .patient_pictogram import (
     PatientPictogramCreateSerializer,
     PictogramForPatientSerializer
 )
+from .anamnesis import (
+    AnamnesisSerializer,
+    AnamnesisListSerializer,
+    CaregiverAnamnesisSerializer
+)

@@ -1,0 +1,122 @@
+### Anamnesis Endpoints Test
+### Base URL: http://localhost:8000/api
+
+### Variables
+@baseUrl = http://localhost:8000/api
+@authToken = your_auth_token_here
+@patientId = 1
+@caregiverId = 1
+
+### List all anamnesis
+GET {{baseUrl}}/anamnesis/
+Authorization: Bearer {{authToken}}
+
+###
+
+### Create anamnesis
+POST {{baseUrl}}/anamnesis/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "patient": {{patientId}},
+    "caregiver": {{caregiverId}},
+    "main_diagnosis": "Transtorno do Espectro Autista",
+    "associated_conditions": "TDAH, Ansiedade",
+    "allergies": "Não possui alergias conhecidas",
+    "medications": "Ritalina 10mg - 1x ao dia",
+    "communication_methods": "Pictogramas, gestos, algumas palavras",
+    "spoken_words": "Mamã, papá, água, banheiro",
+    "preferred_pictograms": "Símbolos de comida, ações básicas",
+    "dietary_restrictions": "Sem glúten",
+    "food_preferences": "Frutas, massas",
+    "feeding_difficulties": "Recusa alimentos com texturas diferentes",
+    "needs_expression": "Aponta para objetos, usa pictogramas",
+    "frustration_reactions": "Gritos, choro, movimentos repetitivos",
+    "general_observations": "Criança muito carinhosa, gosta de rotina"
+}
+
+###
+
+### Get specific anamnesis
+GET {{baseUrl}}/anamnesis/1/
+Authorization: Bearer {{authToken}}
+
+###
+
+### Update anamnesis
+PUT {{baseUrl}}/anamnesis/1/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "patient": {{patientId}},
+    "caregiver": {{caregiverId}},
+    "main_diagnosis": "Transtorno do Espectro Autista - Nível 2",
+    "associated_conditions": "TDAH, Ansiedade social",
+    "allergies": "Não possui alergias conhecidas",
+    "medications": "Ritalina 10mg - 1x ao dia, Melatonina 3mg antes de dormir",
+    "communication_methods": "Pictogramas, gestos, palavras simples",
+    "spoken_words": "Mamã, papá, água, banheiro, não, sim",
+    "preferred_pictograms": "Símbolos de comida, ações básicas, emoções",
+    "dietary_restrictions": "Sem glúten, sem lactose",
+    "food_preferences": "Frutas, massas, arroz",
+    "feeding_difficulties": "Recusa alimentos com texturas diferentes, seletividade alimentar",
+    "needs_expression": "Aponta para objetos, usa pictogramas, algumas palavras",
+    "frustration_reactions": "Gritos, choro, movimentos repetitivos, pode se autolesionar",
+    "general_observations": "Criança muito carinhosa, gosta de rotina. Melhor comunicação pela manhã."
+}
+
+###
+
+### List anamnesis by caregiver
+GET {{baseUrl}}/caregivers/{{caregiverId}}/anamnesis/
+Authorization: Bearer {{authToken}}
+
+###
+
+### List anamnesis for patient
+GET {{baseUrl}}/patients/{{patientId}}/anamnesis/
+Authorization: Bearer {{authToken}}
+
+###
+
+### Create anamnesis for specific patient
+POST {{baseUrl}}/patients/{{patientId}}/anamnesis/create/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "caregiver": {{caregiverId}},
+    "main_diagnosis": "Síndrome de Down",
+    "associated_conditions": "Cardiopatia congênita",
+    "allergies": "Alergia a amendoim",
+    "medications": "Vitaminas, suplemento de ferro",
+    "communication_methods": "Libras, gestos, palavras simples",
+    "spoken_words": "Família, amigos, cores",
+    "preferred_pictograms": "Símbolos grandes e coloridos",
+    "dietary_restrictions": "Dieta cardioprotetora",
+    "food_preferences": "Doces, frutas",
+    "feeding_difficulties": "Mastigação lenta",
+    "needs_expression": "Libras básica, gestos expressivos",
+    "frustration_reactions": "Choro, isolamento",
+    "general_observations": "Criança muito sociável e afetuosa"
+}
+
+###
+
+### Get specific anamnesis by patient and caregiver
+GET {{baseUrl}}/patients/{{patientId}}/anamnesis/caregiver/{{caregiverId}}/
+Authorization: Bearer {{authToken}}
+
+###
+
+### Get anamnesis by IDs (alternative method)
+GET {{baseUrl}}/anamnesis/get/?patient_id={{patientId}}&caregiver_id={{caregiverId}}
+Authorization: Bearer {{authToken}}
+
+###
+
+### Delete anamnesis (soft delete)
+DELETE {{baseUrl}}/anamnesis/1/
+Authorization: Bearer {{authToken}}
