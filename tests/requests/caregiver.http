@@ -1,0 +1,53 @@
+### Endpoints de Cuidadores
+### Base URL: http://localhost:8000
+@baseUrl = http://localhost:8000
+@token = your_token_here
+
+# ====================
+# TESTES PARA ENDPOINTS DE CUIDADORES
+# ====================
+
+### 1. Listar pacientes de um cuidador (com patient_cpf)
+GET {{baseUrl}}/api/caregivers/1/patients/
+Authorization: Bearer {{token}}
+
+### Resposta esperada deve incluir:
+# {
+#   "id": 1,
+#   "patient_id": 1,
+#   "patient_name": "Nome do Paciente",
+#   "patient_cpf": "123.456.789-00",
+#   "patient_email": "paciente@email.com",
+#   "patient_phone": "+5511999999999",
+#   "relationship_type": "FAMILY",
+#   "relationship_type_display": "Familiar",
+#   "start_date": "2024-01-01",
+#   "notes": "Observações sobre o relacionamento",
+#   "is_active": true
+# }
+
+### 2. Teste com cuidador que não tem pacientes
+GET {{baseUrl}}/api/caregivers/999/patients/
+Authorization: Bearer {{token}}
+
+### 3. Teste sem autenticação (deve falhar)
+GET {{baseUrl}}/api/caregivers/1/patients/
+
+# ====================
+# OUTROS ENDPOINTS DE CUIDADORES
+# ====================
+
+### 4. Obter perfil do cuidador
+GET {{baseUrl}}/api/caregivers/1/
+Authorization: Bearer {{token}}
+
+### 5. Atualizar perfil do cuidador
+PUT {{baseUrl}}/api/caregivers/1/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "name": "Nome Atualizado",
+    "email": "novo@email.com",
+    "phone": "+5511888888888"
+}

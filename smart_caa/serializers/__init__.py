@@ -10,6 +10,7 @@ from .patient_caregiver_relationship import (
 from .patient_pictogram import (
     PatientPictogramSerializer,
     PatientPictogramCreateSerializer,
+    PatientPictogramBatchCreateSerializer,
     PictogramForPatientSerializer
 )
 from .anamnesis import (

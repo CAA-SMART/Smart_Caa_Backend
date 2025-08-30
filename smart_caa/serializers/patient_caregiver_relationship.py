@@ -184,6 +184,7 @@ class PatientForCaregiverSerializer(serializers.ModelSerializer):
     """
     patient_id = serializers.IntegerField(source='patient.id')
     patient_name = serializers.CharField(source='patient.name')
+    patient_cpf = serializers.CharField(source='patient.cpf')
     patient_email = serializers.EmailField(source='patient.email')
     patient_phone = serializers.CharField(source='patient.phone')
     relationship_type_display = serializers.CharField(source='get_relationship_type_display')
@@ -194,6 +195,7 @@ class PatientForCaregiverSerializer(serializers.ModelSerializer):
             'id',
             'patient_id',
             'patient_name',
+            'patient_cpf',
             'patient_email',
             'patient_phone',
             'relationship_type',

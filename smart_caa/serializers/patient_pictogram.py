@@ -81,6 +81,100 @@ class PatientPictogramCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class PatientPictogramBatchCreateSerializer(serializers.Serializer):
+    """
+    Serializer para criar múltiplas vinculações de pictogramas ao paciente
+    """
+    pictograms = serializers.ListField(
+        child=serializers.IntegerField(),
+        help_text="Lista de IDs dos pictogramas a serem vinculados",
+        allow_empty=False
+    )
+    
+    def validate_pictograms(self, value):
+        """
+        Valida se os IDs dos pictogramas são válidos
+        """
+        from ..models import Pictogram
+        
+        # Verifica duplicatas
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError(
+                "A lista contém pictogramas duplicados."
+            )
+        
+        # Verifica se todos os pictogramas existem e estão ativos
+        existing_pictograms = Pictogram.objects.filter(
+            id__in=value, 
+            is_active=True
+        )
+        
+        existing_ids = list(existing_pictograms.values_list('id', flat=True))
+        invalid_ids = [pid for pid in value if pid not in existing_ids]
+        
+        if invalid_ids:
+            raise serializers.ValidationError(
+                f"Os seguintes IDs de pictogramas são inválidos ou inativos: {invalid_ids}"
+            )
+        
+        return existing_pictograms
+    
+    def validate(self, attrs):
+        """
+        Valida se os pictogramas não estão já ativos para o paciente
+        """
+        # O patient será passado no contexto da view
+        patient_id = self.context.get('patient_id')
+        if not patient_id:
+            raise serializers.ValidationError("ID do paciente não fornecido.")
+        
+        from ..models import Person
+        try:
+            patient = Person.objects.get(id=patient_id, is_patient=True, is_active=True)
+        except Person.DoesNotExist:
+            raise serializers.ValidationError("Paciente não encontrado.")
+        
+        pictograms = attrs.get('pictograms')
+        
+        # Verifica se algum pictograma já está ativo para o paciente
+        existing_pictograms = PatientPictogram.objects.filter(
+            patient=patient,
+            pictogram__in=pictograms,
+            is_active=True
+        ).values_list('pictogram__name', flat=True)
+        
+        if existing_pictograms:
+            existing_names = list(existing_pictograms)
+            raise serializers.ValidationError(
+                f"Os seguintes pictogramas já estão ativos para este paciente: {', '.join(existing_names)}"
+            )
+        
+        attrs['patient'] = patient
+        return attrs
+    
+    def create(self, validated_data):
+        """
+        Cria múltiplas vinculações de pictogramas ao paciente
+        """
+        patient = validated_data['patient']
+        pictograms = validated_data['pictograms']
+        created_by = None
+        
+        if 'request' in self.context:
+            created_by = self.context['request'].user
+        
+        created_links = []
+        for pictogram in pictograms:
+            link = PatientPictogram.objects.create(
+                patient=patient,
+                pictogram=pictogram,
+                created_by=created_by
+            )
+            created_links.append(link)
+        
+        return created_links
+
+
 class PictogramForPatientSerializer(serializers.ModelSerializer):
     """
     Serializer simplificado para listar pictogramas disponíveis para vincular ao paciente

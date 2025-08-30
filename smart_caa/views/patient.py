@@ -1,4 +1,5 @@
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -12,6 +13,7 @@ from ..serializers import (
     PatientCaregiverRelationshipSerializer,
     PatientPictogramSerializer,
     PatientPictogramCreateSerializer,
+    PatientPictogramBatchCreateSerializer,
     PictogramForPatientSerializer
 )
 
@@ -228,32 +230,107 @@ class PatientPictogramsListView(generics.ListAPIView):
 
 
 @extend_schema(tags=['Patient'])
-class PatientPictogramCreateView(generics.CreateAPIView):
+class PatientPictogramCreateView(APIView):
     """
-    View para vincular um pictograma a um paciente
+    View para vincular um ou múltiplos pictogramas a um paciente
     """
-    serializer_class = PatientPictogramCreateSerializer
     permission_classes = (IsAuthenticated,)
     
     @extend_schema(
-        summary='Vincular Pictograma ao Paciente',
-        description='Utilizado para criar um vínculo entre um paciente e um pictograma'
+        summary='Vincular Pictograma(s) ao Paciente',
+        description='Utilizado para criar vínculo(s) entre um paciente e pictograma(s). Para múltiplos pictogramas, envie um array no campo "pictograms".',
+        request={
+            'application/json': {
+                'oneOf': [
+                    {
+                        'type': 'object',
+                        'properties': {
+                            'pictogram': {'type': 'integer', 'description': 'ID do pictograma (para vínculo único)'}
+                        },
+                        'required': ['pictogram']
+                    },
+                    {
+                        'type': 'object', 
+                        'properties': {
+                            'pictograms': {
+                                'type': 'array',
+                                'items': {'type': 'integer'},
+                                'description': 'Array de IDs dos pictogramas (para múltiplos vínculos)'
+                            }
+                        },
+                        'required': ['pictograms']
+                    }
+                ]
+            }
+        },
+        responses={
+            201: PatientPictogramSerializer(many=True),
+            400: "Dados inválidos"
+        }
     )
     def post(self, request, *args, **kwargs):
-        # Adiciona o patient_id da URL aos dados
         patient_id = self.kwargs['patient_id']
-        data = request.data.copy()
-        data['patient'] = patient_id
         
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
-    def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        # Verifica se é criação em lote ou única
+        if 'pictograms' in request.data:
+            # Criação em lote
+            serializer = PatientPictogramBatchCreateSerializer(
+                data=request.data, 
+                context={'request': request, 'patient_id': patient_id}
+            )
+            
+            if serializer.is_valid():
+                created_links = serializer.save()
+                
+                # Retorna os objetos criados
+                response_serializer = PatientPictogramSerializer(
+                    created_links, 
+                    many=True, 
+                    context={'request': request}
+                )
+                
+                return Response(
+                    {
+                        'message': f'{len(created_links)} pictogramas vinculados com sucesso.',
+                        'data': response_serializer.data
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    serializer.errors, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            # Criação única (comportamento original)
+            data = request.data.copy()
+            data['patient'] = patient_id
+            
+            serializer = PatientPictogramCreateSerializer(
+                data=data, 
+                context={'request': request}
+            )
+            
+            if serializer.is_valid():
+                patient_pictogram = serializer.save(created_by=request.user)
+                
+                response_serializer = PatientPictogramSerializer(
+                    patient_pictogram, 
+                    context={'request': request}
+                )
+                
+                return Response(
+                    {
+                        'message': 'Pictograma vinculado com sucesso.',
+                        'data': response_serializer.data
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    serializer.errors, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
 
 @extend_schema(tags=['Patient'])
