@@ -188,6 +188,7 @@ class PatientForCaregiverSerializer(serializers.ModelSerializer):
     patient_email = serializers.EmailField(source='patient.email')
     patient_phone = serializers.CharField(source='patient.phone')
     relationship_type_display = serializers.CharField(source='get_relationship_type_display')
+    inactivated_by_username = serializers.CharField(source='inactivated_by.username', read_only=True, allow_null=True)
     
     class Meta:
         model = PatientCaregiverRelationship
@@ -202,5 +203,8 @@ class PatientForCaregiverSerializer(serializers.ModelSerializer):
             'relationship_type_display',
             'start_date',
             'notes',
-            'is_active'
+            'is_active',
+            'inactivated_at',
+            'inactivated_by_username',
+            'created_at'
         ]

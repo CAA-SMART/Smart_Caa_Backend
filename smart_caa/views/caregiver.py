@@ -90,7 +90,7 @@ class CaregiverRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 @extend_schema(tags=['Caregiver'])
 class CaregiverPatientsListView(generics.ListAPIView):
     """
-    View para listar todos os pacientes de um cuidador específico
+    View para listar todos os pacientes de um cuidador específico (ativos e inativos)
     """
     serializer_class = PatientForCaregiverSerializer
     permission_classes = (IsAuthenticated,)
@@ -98,13 +98,12 @@ class CaregiverPatientsListView(generics.ListAPIView):
     def get_queryset(self):
         caregiver_id = self.kwargs['caregiver_id']
         return PatientCaregiverRelationship.objects.filter(
-            caregiver_id=caregiver_id,
-            is_active=True
-        ).select_related('patient', 'caregiver')
+            caregiver_id=caregiver_id
+        ).select_related('patient', 'caregiver').order_by('-is_active', '-created_at')
     
     @extend_schema(
         summary='Listar Pacientes do Cuidador',
-        description='Utilizado para listar todos os pacientes vinculados a um cuidador específico'
+        description='Utilizado para listar todos os pacientes vinculados a um cuidador específico. Retorna primeiro os relacionamentos ativos, depois os inativos, ordenados por data de criação.'
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
