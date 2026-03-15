@@ -57,15 +57,16 @@ class PictogramAdmin(admin.ModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'cpf', 'get_person_types', 'email', 'phone', 'profession', 'cid', 'is_active', 'created_at']
-    search_fields = ['name', 'cpf', 'email', 'phone', 'profession', 'cid']
+    list_display = ['name', 'cpf', 'user', 'get_person_types', 'email', 'phone', 'profession', 'cid', 'is_active', 'created_at']
+    search_fields = ['name', 'cpf', 'email', 'phone', 'profession', 'cid', 'user__username', 'user__email']
     list_filter = ['is_patient', 'is_caregiver', 'is_active', 'created_at', 'created_by']
     readonly_fields = ['created_by', 'created_at', 'updated_at']
+    raw_id_fields = ['user']
     ordering = ['name']
     
     fieldsets = (
         ('Dados Básicos', {
-            'fields': ('name', 'cpf', 'email', 'phone', 'profession', 'cid')
+            'fields': ('user', 'name', 'cpf', 'email', 'phone', 'profession', 'cid')
         }),
         ('Endereço', {
             'fields': ('postal_code', 'state', 'city', 'district', 'street', 'number', 'complement'),
@@ -104,7 +105,7 @@ class PersonAdmin(admin.ModelAdmin):
     
     def get_queryset(self, request):
         """Otimiza as consultas incluindo o usuário criador"""
-        return super().get_queryset(request).select_related('created_by')
+        return super().get_queryset(request).select_related('created_by', 'user')
 
 
 @admin.register(PatientCaregiverRelationship)
