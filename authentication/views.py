@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
@@ -50,7 +52,9 @@ class ForgotPasswordView(APIView):
         if not user:
             return Response(success_response, status=status.HTTP_200_OK)
 
-        generated_password = f"smart{timezone.localtime().strftime('%H%M')}"
+        # Gera senha temporaria com hora e minuto atuais no fuso de Sao Paulo.
+        now_sp = timezone.now().astimezone(ZoneInfo('America/Sao_Paulo'))
+        generated_password = f"smart{now_sp.strftime('%H%M')}"
 
         context = {
             'user': user,
