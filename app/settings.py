@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -162,17 +163,24 @@ if DEBUG:
         "http://127.0.0.1:8080",
     ]
 
-# Configurações de Email (para desenvolvimento)
-if DEBUG:
+# Configurações de Email
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = 'caasmart.ti@gmail.com'
+EMAIL_HOST_PASSWORD = 'fegnqdlnhsmjydhh'
+DEFAULT_FROM_EMAIL = 'caasmart.ti@gmail.com'
+
+# Se não houver credenciais configuradas no ambiente, usa backend de console em desenvolvimento
+if DEBUG and (not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
-    # Configurar email real para produção
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'seu-email@gmail.com'
-    EMAIL_HOST_PASSWORD = 'sua-senha-de-app'
+
+# URL do frontend que processa redefinição de senha
+FRONTEND_RESET_PASSWORD_URL = config(
+    'FRONTEND_RESET_PASSWORD_URL',
+    default='http://localhost:3000/reset-password'
+)
 
 # Configurações de Log
 LOGGING = {
