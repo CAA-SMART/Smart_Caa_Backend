@@ -176,12 +176,6 @@ DEFAULT_FROM_EMAIL = 'caasmart.ti@gmail.com'
 if DEBUG and (not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# URL do frontend que processa redefinição de senha
-FRONTEND_RESET_PASSWORD_URL = config(
-    'FRONTEND_RESET_PASSWORD_URL',
-    default='http://localhost:3000/reset-password'
-)
-
 # Configurações de Log
 LOGGING = {
     'version': 1,

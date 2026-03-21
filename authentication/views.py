@@ -1,18 +1,27 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from smtplib import SMTPException
 from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import ForgotPasswordSerializer, ResetPasswordSerializer
+from .serializers import ChangePasswordSerializer, ForgotPasswordSerializer
+
+
+@extend_schema(tags=['Authentication'])
+class AuthenticationTokenObtainPairView(TokenObtainPairView):
+    pass
+
+
+@extend_schema(tags=['Authentication'])
+class AuthenticationTokenRefreshView(TokenRefreshView):
+    pass
 
 
 @extend_schema(tags=['Authentication'])
@@ -21,7 +30,7 @@ class ForgotPasswordView(APIView):
 
     @extend_schema(
         summary='Solicitar redefinicao de senha',
-        description='Recebe um e-mail e envia instrucoes para redefinicao de senha.',
+        description='Recebe um e-mail e, se cadastrado, gera e envia uma nova senha temporaria.',
         request=ForgotPasswordSerializer,
         responses={200: {'description': 'Solicitacao processada com sucesso'}}
     )
@@ -35,19 +44,17 @@ class ForgotPasswordView(APIView):
 
         # Resposta uniforme para evitar enumeracao de contas.
         success_response = {
-            'detail': 'Se o e-mail estiver cadastrado, voce recebera instrucoes para redefinir sua senha.'
+            'detail': 'Se o e-mail estiver cadastrado no sistema, voce recebera uma nova senha.'
         }
 
         if not user:
             return Response(success_response, status=status.HTTP_200_OK)
 
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        reset_url = f"{settings.FRONTEND_RESET_PASSWORD_URL}?uid={uid}&token={token}"
+        generated_password = f"smart{timezone.localtime().strftime('%H%M')}"
 
         context = {
             'user': user,
-            'reset_url': reset_url,
+            'generated_password': generated_password,
             'app_name': 'Smart CAA',
         }
 
@@ -74,35 +81,34 @@ class ForgotPasswordView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+        user.set_password(generated_password)
+        user.save(update_fields=['password'])
+
         return Response(success_response, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['Authentication'])
-class ResetPasswordView(APIView):
+class ChangePasswordView(APIView):
     permission_classes = (AllowAny,)
 
     @extend_schema(
-        summary='Confirmar redefinicao de senha',
-        description='Valida token de recuperacao e define a nova senha.',
-        request=ResetPasswordSerializer,
+        summary='Alterar senha',
+        description='Recebe usuario, senha atual e nova senha. Se validos, altera a senha.',
+        request=ChangePasswordSerializer,
         responses={200: {'description': 'Senha alterada com sucesso'}, 400: {'description': 'Dados invalidos'}}
     )
     def post(self, request):
         user_model = get_user_model()
-        serializer = ResetPasswordSerializer(
+        serializer = ChangePasswordSerializer(
             data=request.data,
             context={'user_model': user_model},
         )
         serializer.is_valid(raise_exception=True)
 
         user = serializer.validated_data['user']
-        token = serializer.validated_data['token']
         new_password = serializer.validated_data['new_password']
-
-        if not default_token_generator.check_token(user, token):
-            return Response({'detail': 'Token invalido ou expirado.'}, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(new_password)
         user.save(update_fields=['password'])
 
-        return Response({'detail': 'Senha redefinida com sucesso.'}, status=status.HTTP_200_OK)
+        return Response({'detail': 'Senha alterada com sucesso.'}, status=status.HTTP_200_OK)
