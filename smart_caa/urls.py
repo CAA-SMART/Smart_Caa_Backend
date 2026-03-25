@@ -29,7 +29,9 @@ from .views import (
     PatientAnamnesisListView,
     PatientCaregiverAnamnesisView,
     CreatePatientAnamnesisView,
-    GetAnamnesisView
+    GetAnamnesisView,
+    HistoryCreateListView,
+    HistoryRetrieveUpdateDestroyView
 )
 
 urlpatterns = [
@@ -86,4 +88,8 @@ urlpatterns = [
     path('api/patients/<int:patient_id>/anamnesis/', PatientAnamnesisListView.as_view(), name='patient-anamnesis-list'),
     path('api/patients/<int:patient_id>/anamnesis/create/', CreatePatientAnamnesisView.as_view(), name='patient-anamnesis-create'),
     path('api/patients/<int:patient_id>/anamnesis/caregiver/<int:caregiver_id>/', PatientCaregiverAnamnesisView.as_view(), name='patient-caregiver-anamnesis'),
+
+    # History endpoints
+    path('api/histories/', HistoryCreateListView.as_view(), name='history-list-create'),
+    path('api/histories/<int:pk>/', HistoryRetrieveUpdateDestroyView.as_view(), name='history-detail'),
 ]

@@ -5,3 +5,4 @@ from .person import Person
 from .patient_caregiver_relationship import PatientCaregiverRelationship
 from .patient_pictogram import PatientPictogram
 from .anamnesis import Anamnesis
+from .history import History

@@ -18,3 +18,4 @@ from .anamnesis import (
     AnamnesisListSerializer,
     CaregiverAnamnesisSerializer
 )
+from .history import HistorySerializer

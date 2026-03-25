@@ -36,3 +36,7 @@ from .anamnesis import (
     CreatePatientAnamnesisView,
     GetAnamnesisView
 )
+from .history import (
+    HistoryCreateListView,
+    HistoryRetrieveUpdateDestroyView
+)
