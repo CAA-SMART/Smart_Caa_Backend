@@ -39,6 +39,12 @@ class Pictogram(BaseModel):
         verbose_name="Descrição",
         help_text="Descrição adicional do pictograma"
     )
+
+    private = models.BooleanField(
+        default=False,
+        verbose_name="Privado para um paciente",
+        help_text="Se marcado esse pictograma será disponibilizado apenas para o paciente que foi vinculado a ele"
+    )
     
     is_default = models.BooleanField(
         default=False,

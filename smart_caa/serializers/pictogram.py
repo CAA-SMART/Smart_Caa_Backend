@@ -41,6 +41,7 @@ class PictogramSerializer(serializers.ModelSerializer):
             'audio',
             'audio_url',
             'is_active',
+            'private',
             'created_by',
             'created_by_username',
             'created_at',
@@ -65,6 +66,9 @@ class PictogramSerializer(serializers.ModelSerializer):
             },
             'is_active': {
                 'help_text': 'Indica se o pictograma está ativo'
+            },
+            'private': {
+                'help_text': 'Se marcado esse pictograma será disponibilizado apenas para o paciente que foi vinculado a ele'
             },
             'id': {
                 'help_text': 'ID único do pictograma'

@@ -1,6 +1,6 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from ..models import Pictogram
 from ..serializers import PictogramSerializer
 
@@ -13,8 +13,18 @@ class PictogramCreateListView(generics.ListCreateAPIView):
     
     @extend_schema(
         summary='Listar Pictogramas',
-        description='Utilizado para listar todos os pictogramas'
+        description='Utilizado para listar todos os pictogramas',
+        parameters=[
+            OpenApiParameter(
+                name='private',
+                type=bool,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description='Filtrar por pictogramas privados (true/false)'
+            )
+        ]
     )
+    
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
     
@@ -29,8 +39,15 @@ class PictogramCreateListView(generics.ListCreateAPIView):
         serializer.save(created_by=self.request.user)
     
     def get_queryset(self):
-        """Otimiza as consultas incluindo a categoria relacionada"""
-        return Pictogram.objects.select_related('category', 'created_by')
+        """Otimiza as consultas incluindo a categoria relacionada e permite filtro por 'private'"""
+        queryset = Pictogram.objects.select_related('category', 'created_by')
+        private = self.request.query_params.get('private')
+        if private is not None:
+            if private.lower() in ['true', '1']:
+                queryset = queryset.filter(private=True)
+            elif private.lower() in ['false', '0']:
+                queryset = queryset.filter(private=False)
+        return queryset
 
 
 @extend_schema(tags=['Pictogram'])
