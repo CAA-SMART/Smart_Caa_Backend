@@ -40,3 +40,4 @@ from .history import (
     HistoryCreateListView,
     HistoryRetrieveUpdateDestroyView
 )
+from .attachment import AttachmentCreateListView, AttachmentRetrieveUpdateDestroyView

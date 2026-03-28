@@ -19,3 +19,4 @@ from .anamnesis import (
     CaregiverAnamnesisSerializer
 )
 from .history import HistorySerializer
+from .attachment import AttachmentSerializer

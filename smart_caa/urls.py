@@ -31,7 +31,9 @@ from .views import (
     CreatePatientAnamnesisView,
     GetAnamnesisView,
     HistoryCreateListView,
-    HistoryRetrieveUpdateDestroyView
+    HistoryRetrieveUpdateDestroyView,
+    AttachmentCreateListView,
+    AttachmentRetrieveUpdateDestroyView
 )
 
 urlpatterns = [
@@ -92,4 +94,8 @@ urlpatterns = [
     # History endpoints
     path('api/histories/', HistoryCreateListView.as_view(), name='history-list-create'),
     path('api/histories/<int:pk>/', HistoryRetrieveUpdateDestroyView.as_view(), name='history-detail'),
+    
+    # Attachment endpoints
+    path('api/attachments/', AttachmentCreateListView.as_view(), name='attachment-list-create'),
+    path('api/attachments/<int:pk>/', AttachmentRetrieveUpdateDestroyView.as_view(), name='attachment-detail'),
 ]

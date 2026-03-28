@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import EverydayCategory, Pictogram, Person, PatientCaregiverRelationship, PatientPictogram, History
+from .models.attachment import Attachment
 
 
 class PictogramInline(admin.TabularInline):
@@ -224,3 +225,12 @@ class HistoryAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related(
             'patient', 'caregiver', 'created_by', 'inactivated_by'
         )
+
+
+@admin.register(Attachment)
+class AttachmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'patient', 'file', 'created_at']
+    search_fields = ['name', 'patient__name']
+    list_filter = ['created_at', 'patient']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
