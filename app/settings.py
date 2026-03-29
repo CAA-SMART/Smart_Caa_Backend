@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 
     'authentication',
     'smart_caa',
+    'management',
 ]
 
 MIDDLEWARE = [
