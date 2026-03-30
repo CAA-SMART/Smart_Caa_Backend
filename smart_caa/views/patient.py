@@ -213,6 +213,7 @@ class PatientPictogramsListView(generics.ListAPIView):
     """
     serializer_class = PatientPictogramSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = None
     
     def get_queryset(self):
         patient_id = self.kwargs['patient_id']
@@ -371,6 +372,7 @@ class PatientAvailablePictogramsView(generics.ListAPIView):
     """
     serializer_class = PictogramForPatientSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = None
     
     def get_queryset(self):
         patient_id = self.kwargs['patient_id']
