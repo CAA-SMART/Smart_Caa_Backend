@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
-from ..models import PatientPictogram, Pictogram
+from ..models import EverydayCategory, PatientPictogram, Person, Pictogram
 
 
 class PatientPictogramSerializer(serializers.ModelSerializer):
@@ -79,6 +79,81 @@ class PatientPictogramCreateSerializer(serializers.ModelSerializer):
             validated_data['created_by'] = self.context['request'].user
         
         return super().create(validated_data)
+
+
+class PatientCustomPictogramCreateSerializer(serializers.Serializer):
+    """
+    Serializer para criar um pictograma personalizado e vinculá-lo ao paciente
+    em uma única operação.
+    """
+    name = serializers.CharField(max_length=100, help_text="Nome do pictograma")
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=EverydayCategory.objects.filter(is_active=True),
+        help_text="ID da categoria do cotidiano"
+    )
+    image = serializers.ImageField(help_text="Arquivo de imagem do pictograma")
+    audio = serializers.FileField(
+        required=False,
+        allow_null=True,
+        help_text="Arquivo de áudio do pictograma (opcional)"
+    )
+    description = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        help_text="Descrição adicional do pictograma"
+    )
+
+    def validate(self, attrs):
+        patient_id = self.context.get('patient_id')
+        if not patient_id:
+            raise serializers.ValidationError("ID do paciente não fornecido.")
+
+        try:
+            patient = Person.objects.get(id=patient_id, is_active=True)
+        except Person.DoesNotExist:
+            raise serializers.ValidationError("Paciente não encontrado.")
+
+        if not patient.is_patient:
+            raise serializers.ValidationError("A pessoa informada não é um paciente válido.")
+
+        if Pictogram.objects.filter(
+            name=attrs.get('name'),
+            category=attrs.get('category'),
+            is_active=True
+        ).exists():
+            raise serializers.ValidationError({
+                'name': 'Já existe um pictograma ativo com este nome nesta categoria.'
+            })
+
+        attrs['patient'] = patient
+        return attrs
+
+    def create(self, validated_data):
+        patient = validated_data.pop('patient')
+        request = self.context.get('request')
+        created_by = request.user if request and request.user.is_authenticated else None
+
+        pictogram = None
+        try:
+            pictogram = Pictogram.objects.create(
+                **validated_data,
+                private=True,
+                is_default=False,
+                created_by=created_by,
+            )
+            return PatientPictogram.objects.create(
+                patient=patient,
+                pictogram=pictogram,
+                created_by=created_by,
+            )
+        except Exception:
+            if pictogram is not None:
+                if pictogram.image:
+                    pictogram.image.delete(save=False)
+                if pictogram.audio:
+                    pictogram.audio.delete(save=False)
+            raise
 
 
 class PatientPictogramBatchCreateSerializer(serializers.Serializer):

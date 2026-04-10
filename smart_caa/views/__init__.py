@@ -8,6 +8,7 @@ from .patient import (
     PatientCaregiverDetailView,
     PatientPictogramsListView,
     PatientPictogramCreateView,
+    PatientCustomPictogramCreateView,
     PatientPictogramDestroyView,
     PatientAvailablePictogramsView
 )

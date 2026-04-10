@@ -1,0 +1,110 @@
+@baseUrl = http://localhost:8000
+@authToken = {{login.response.body.access}}
+
+### Fazer login para obter token de autenticação
+# @name login
+POST {{baseUrl}}/authentication/token
+Content-Type: application/json
+
+{
+    "username": "janioalexandre",
+    "password": "123456"
+}
+
+###
+# PICTOGRAMA PERSONALIZADO DO PACIENTE
+###
+
+### Adicionar pictograma personalizado e já vincular ao paciente
+# @name adicionarPictogramaPersonalizado
+POST {{baseUrl}}/api/patients/1/pictograms/custom/create/
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=SmartCaaBoundary
+
+--SmartCaaBoundary
+Content-Disposition: form-data; name="name"
+
+Beber Água
+--SmartCaaBoundary
+Content-Disposition: form-data; name="category"
+
+1
+--SmartCaaBoundary
+Content-Disposition: form-data; name="description"
+
+Pictograma personalizado privado para o paciente.
+--SmartCaaBoundary
+Content-Disposition: form-data; name="image"; filename="agua.png"
+Content-Type: image/png
+
+< ./files/agua.png
+--SmartCaaBoundary--
+
+### Adicionar pictograma personalizado com áudio
+# @name adicionarPictogramaPersonalizadoComAudio
+POST {{baseUrl}}/api/patients/1/pictograms/custom/create/
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=SmartCaaBoundary
+
+--SmartCaaBoundary
+Content-Disposition: form-data; name="name"
+
+Ir ao banheiro
+--SmartCaaBoundary
+Content-Disposition: form-data; name="category"
+
+1
+--SmartCaaBoundary
+Content-Disposition: form-data; name="description"
+
+Pictograma com imagem e áudio.
+--SmartCaaBoundary
+Content-Disposition: form-data; name="image"; filename="banheiro.png"
+Content-Type: image/png
+
+< ./files/banheiro.png
+--SmartCaaBoundary
+Content-Disposition: form-data; name="audio"; filename="banheiro.mp3"
+Content-Type: audio/mpeg
+
+< ./files/banheiro.mp3
+--SmartCaaBoundary--
+
+### Validar erro ao tentar criar para uma pessoa que não é paciente
+# @name adicionarPictogramaParaNaoPaciente
+POST {{baseUrl}}/api/patients/999/pictograms/custom/create/
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=SmartCaaBoundary
+
+--SmartCaaBoundary
+Content-Disposition: form-data; name="name"
+
+Teste Inválido
+--SmartCaaBoundary
+Content-Disposition: form-data; name="category"
+
+1
+--SmartCaaBoundary
+Content-Disposition: form-data; name="image"; filename="teste.png"
+Content-Type: image/png
+
+< ./files/teste.png
+--SmartCaaBoundary--
+
+### Listar pictogramas já vinculados ao paciente após o cadastro
+# @name listarPictogramasPacienteAposCadastro
+GET {{baseUrl}}/api/patients/1/pictograms/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Listar apenas pictogramas privados do paciente
+# @name listarPictogramasPrivadosPaciente
+GET {{baseUrl}}/api/patients/1/pictograms/?private=true
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+### Listar apenas pictogramas públicos do paciente
+# @name listarPictogramasPublicosPaciente
+GET {{baseUrl}}/api/patients/1/pictograms/?private=false
+Authorization: Bearer {{authToken}}
+Content-Type: application/json

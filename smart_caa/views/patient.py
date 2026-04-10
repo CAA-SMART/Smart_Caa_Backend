@@ -4,6 +4,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from ..models import Person, PatientCaregiverRelationship, PatientPictogram, Pictogram
@@ -13,6 +15,7 @@ from ..serializers import (
     PatientCaregiverRelationshipSerializer,
     PatientPictogramSerializer,
     PatientPictogramCreateSerializer,
+    PatientCustomPictogramCreateSerializer,
     PatientPictogramBatchCreateSerializer,
     PictogramForPatientSerializer
 )
@@ -217,14 +220,32 @@ class PatientPictogramsListView(generics.ListAPIView):
     
     def get_queryset(self):
         patient_id = self.kwargs['patient_id']
-        return PatientPictogram.objects.filter(
+        queryset = PatientPictogram.objects.filter(
             patient_id=patient_id,
             is_active=True
         ).select_related('pictogram', 'pictogram__category', 'created_by')
+
+        private = self.request.query_params.get('private')
+        if private is not None:
+            if private.lower() in ['true', '1']:
+                queryset = queryset.filter(pictogram__private=True)
+            elif private.lower() in ['false', '0']:
+                queryset = queryset.filter(pictogram__private=False)
+
+        return queryset
     
     @extend_schema(
         summary='Listar Pictogramas do Paciente',
-        description='Utilizado para listar todos os pictogramas vinculados a um paciente específico'
+        description='Utilizado para listar todos os pictogramas vinculados a um paciente específico. Opcionalmente pode filtrar por pictogramas privados usando `?private=true` ou `?private=false`.',
+        parameters=[
+            OpenApiParameter(
+                name='private',
+                type=bool,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description='Filtrar apenas pictogramas privados (`true`) ou públicos (`false`) do paciente.'
+            )
+        ]
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -335,6 +356,62 @@ class PatientPictogramCreateView(APIView):
 
 
 @extend_schema(tags=['Patient'])
+class PatientCustomPictogramCreateView(APIView):
+    """
+    View para criar um pictograma personalizado privado e vinculá-lo
+    ao paciente em uma única transação.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        summary='Adicionar Pictograma Personalizado',
+        description='Cria um pictograma privado e já o vincula ao paciente em uma única operação. Se qualquer etapa falhar, nada é salvo.',
+        request=PatientCustomPictogramCreateSerializer,
+        responses={
+            201: PatientPictogramSerializer,
+            400: "Dados inválidos"
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = PatientCustomPictogramCreateSerializer(
+            data=request.data,
+            context={'request': request, 'patient_id': self.kwargs['patient_id']}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            with transaction.atomic():
+                patient_pictogram = serializer.save()
+        except (ValueError, DjangoValidationError, IntegrityError) as exc:
+            return Response(
+                {
+                    'detail': 'Não foi possível adicionar o pictograma personalizado.',
+                    'error': str(exc)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception:
+            return Response(
+                {
+                    'detail': 'Ocorreu um erro ao salvar o pictograma personalizado. Nenhum dado foi persistido.'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        response_serializer = PatientPictogramSerializer(
+            patient_pictogram,
+            context={'request': request}
+        )
+
+        return Response(
+            {
+                'message': 'Pictograma personalizado adicionado com sucesso.',
+                'data': response_serializer.data
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
 class PatientPictogramDestroyView(generics.DestroyAPIView):
     """
     View para desvincular um pictograma de um paciente (inativar)
@@ -383,9 +460,10 @@ class PatientAvailablePictogramsView(generics.ListAPIView):
             is_active=True
         ).values_list('pictogram_id', flat=True)
         
-        # Retorna pictogramas ativos que não estão vinculados ao paciente
+        # Retorna apenas pictogramas públicos ativos que ainda não estão vinculados ao paciente
         return Pictogram.objects.filter(
-            is_active=True
+            is_active=True,
+            private=False,
         ).exclude(
             id__in=linked_pictograms
         ).select_related('category')
