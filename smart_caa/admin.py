@@ -229,8 +229,8 @@ class HistoryAdmin(admin.ModelAdmin):
 
 @admin.register(Attachment)
 class AttachmentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'patient', 'file', 'created_at']
-    search_fields = ['name', 'patient__name']
-    list_filter = ['created_at', 'patient']
+    list_display = ['name', 'patient', 'history', 'file', 'created_at']
+    search_fields = ['name', 'patient__name', 'history__description']
+    list_filter = ['created_at', 'patient', 'history']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']

@@ -1,9 +1,9 @@
-from rest_framework import generics, status
+from rest_framework import generics, serializers, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
 from ..models import PatientCaregiverRelationship
 from ..serializers import PatientCaregiverRelationshipSerializer, PatientCaregiverListSerializer
 
@@ -104,7 +104,19 @@ class PatientCaregiverRelationshipInactivateView(APIView):
     
     @extend_schema(
         summary='Inativar Relacionamento',
-        description='Utilizado para inativar um relacionamento entre paciente e cuidador'
+        description='Utilizado para inativar um relacionamento entre paciente e cuidador',
+        request=None,
+        responses={
+            200: inline_serializer(
+                name='PatientCaregiverRelationshipInactivateResponse',
+                fields={
+                    'detail': serializers.CharField(),
+                    'relationship': PatientCaregiverRelationshipSerializer()
+                }
+            ),
+            400: OpenApiResponse(description='Relacionamento já está inativo'),
+            404: OpenApiResponse(description='Relacionamento não encontrado')
+        }
     )
     def post(self, request, pk):
         try:

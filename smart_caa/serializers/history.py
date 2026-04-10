@@ -10,6 +10,10 @@ class HistorySerializer(serializers.ModelSerializer):
         help_text="Nome do paciente"
     )
 
+    attachment_count = serializers.SerializerMethodField(
+        help_text="Quantidade de anexos vinculados a este histórico"
+    )
+
     caregiver_name = serializers.CharField(
         source='caregiver.name',
         read_only=True,
@@ -22,6 +26,9 @@ class HistorySerializer(serializers.ModelSerializer):
         help_text="Nome do usuário que criou o registro"
     )
 
+    def get_attachment_count(self, obj) -> int:
+        return getattr(obj, 'attachment_count', obj.attachments.filter(is_active=True).count())
+
     class Meta:
         model = History
         fields = [
@@ -31,6 +38,7 @@ class HistorySerializer(serializers.ModelSerializer):
             'caregiver',
             'caregiver_name',
             'description',
+            'attachment_count',
             'is_active',
             'created_by',
             'created_by_username',

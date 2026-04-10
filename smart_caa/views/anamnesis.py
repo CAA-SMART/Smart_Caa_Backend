@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from django.shortcuts import get_object_or_404
 from ..models import Anamnesis, Person
 from ..serializers import (
@@ -244,20 +244,20 @@ class GetAnamnesisView(generics.RetrieveAPIView):
         summary='Obter Anamnese por IDs',
         description='Retorna a anamnese usando IDs do paciente e cuidador como query parameters',
         parameters=[
-            {
-                'name': 'patient_id',
-                'in': 'query',
-                'required': True,
-                'schema': {'type': 'integer'},
-                'description': 'ID do paciente'
-            },
-            {
-                'name': 'caregiver_id', 
-                'in': 'query',
-                'required': True,
-                'schema': {'type': 'integer'},
-                'description': 'ID do cuidador'
-            }
+            OpenApiParameter(
+                name='patient_id',
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description='ID do paciente'
+            ),
+            OpenApiParameter(
+                name='caregiver_id',
+                type=int,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description='ID do cuidador'
+            )
         ]
     )
     def get(self, request, *args, **kwargs):

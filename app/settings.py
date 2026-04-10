@@ -266,6 +266,14 @@ SPECTACULAR_SETTINGS = {
         {
             'name': 'Caregiver',
             'description': 'Operações relacionadas aos cuidadores'
+        },
+        {
+            'name': 'History',
+            'description': 'Operações relacionadas aos históricos dos pacientes'
+        },
+        {
+            'name': 'Attachment',
+            'description': 'Operações relacionadas aos anexos dos pacientes, com vínculo opcional a um histórico'
         }
     ]
 }

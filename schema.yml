@@ -4,6 +4,360 @@ info:
   version: 1.0.0
   description: API para o sistema Smart CAA (Comunicação Aumentativa e Alternativa)
 paths:
+  /api/anamnesis/:
+    get:
+      operationId: api_anamnesis_list
+      description: Lista todas as anamneses ativas no sistema. **Requer autenticação.**
+      summary: Listar Anamneses
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Anamnesis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAnamnesisListList'
+          description: ''
+    post:
+      operationId: api_anamnesis_create
+      description: Cria uma nova anamnese para um paciente. Apenas uma anamnese por
+        paciente/cuidador é permitida. **Requer autenticação.**
+      summary: Criar Anamnese
+      tags:
+      - Anamnesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anamnesis'
+          description: ''
+  /api/anamnesis/{id}/:
+    get:
+      operationId: api_anamnesis_retrieve
+      description: Retorna os detalhes de uma anamnese específica
+      summary: Obter Anamnese
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Anamnesis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anamnesis'
+          description: ''
+    put:
+      operationId: api_anamnesis_update
+      description: Atualiza completamente uma anamnese específica
+      summary: Atualizar Anamnese
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Anamnesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anamnesis'
+          description: ''
+    patch:
+      operationId: api_anamnesis_partial_update
+      description: Atualiza parcialmente uma anamnese específica
+      summary: Atualizar Parcialmente Anamnese
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Anamnesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAnamnesisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAnamnesisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAnamnesisRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anamnesis'
+          description: ''
+    delete:
+      operationId: api_anamnesis_destroy
+      description: Remove uma anamnese do sistema (soft delete)
+      summary: Deletar Anamnese
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Anamnesis
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/anamnesis/get/:
+    get:
+      operationId: api_anamnesis_get_retrieve
+      description: Retorna a anamnese usando IDs do paciente e cuidador como query
+        parameters
+      summary: Obter Anamnese por IDs
+      parameters:
+      - in: query
+        name: caregiver_id
+        schema:
+          type: integer
+        description: ID do cuidador
+        required: true
+      - in: query
+        name: patient_id
+        schema:
+          type: integer
+        description: ID do paciente
+        required: true
+      tags:
+      - Anamnesis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anamnesis'
+          description: ''
+  /api/attachments/:
+    get:
+      operationId: api_attachments_list
+      description: Lista todos os anexos, com filtro opcional por paciente e por histórico.
+      summary: Listar Anexos
+      parameters:
+      - in: query
+        name: history
+        schema:
+          type: integer
+        description: Filtrar anexos por histórico (ID). Alias legado de `history_id`.
+      - in: query
+        name: history_id
+        schema:
+          type: integer
+        description: Filtrar anexos por histórico (ID). Parâmetro recomendado.
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: patient
+        schema:
+          type: integer
+        description: Filtrar anexos por paciente (ID)
+      tags:
+      - Attachment
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAttachmentList'
+          description: ''
+    post:
+      operationId: api_attachments_create
+      description: Cria um novo anexo para um paciente via `multipart/form-data`.
+        O campo `history` é opcional e deve receber o ID de um histórico do mesmo
+        paciente, quando informado.
+      summary: Criar Anexo
+      tags:
+      - Attachment
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttachmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AttachmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+          description: ''
+        '400':
+          description: Dados inválidos
+  /api/attachments/{id}/:
+    get:
+      operationId: api_attachments_retrieve
+      description: Utilizado para obter um anexo específico.
+      summary: Obter Anexo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Attachment
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+          description: ''
+    put:
+      operationId: api_attachments_update
+      description: Atualiza completamente um anexo. O campo `history` continua opcional.
+      summary: Atualizar Anexo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Attachment
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttachmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AttachmentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+          description: ''
+        '400':
+          description: Dados inválidos
+    patch:
+      operationId: api_attachments_partial_update
+      description: Atualiza parcialmente um anexo. Você pode enviar `history` com
+        um ID válido ou `null`.
+      summary: Atualizar Parcialmente Anexo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Attachment
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAttachmentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAttachmentRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+          description: ''
+        '400':
+          description: Dados inválidos
+    delete:
+      operationId: api_attachments_destroy
+      description: Exclui um anexo pelo ID
+      summary: Excluir Anexo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Attachment
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Anexo excluído com sucesso
   /api/caregivers/:
     get:
       operationId: api_caregivers_list
@@ -57,11 +411,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/Caregiver'
           description: ''
+  /api/caregivers/{caregiver_id}/anamnesis/:
+    get:
+      operationId: api_caregivers_anamnesis_list
+      description: Lista todas as anamneses criadas por um cuidador específico
+      summary: Listar Anamneses de um Cuidador
+      parameters:
+      - in: path
+        name: caregiver_id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - Anamnesis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCaregiverAnamnesisList'
+          description: ''
   /api/caregivers/{caregiver_id}/patients/:
     get:
       operationId: api_caregivers_patients_list
       description: Utilizado para listar todos os pacientes vinculados a um cuidador
-        específico
+        específico. Retorna primeiro os relacionamentos ativos, depois os inativos,
+        ordenados por data de criação.
       summary: Listar Pacientes do Cuidador
       parameters:
       - in: path
@@ -344,6 +727,171 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/histories/:
+    get:
+      operationId: api_histories_list
+      description: Lista históricos ativos. Permite filtros por `patient_id` e `caregiver_id`
+        via query parameters e retorna `attachment_count` para cada item.
+      summary: Listar Históricos
+      parameters:
+      - in: query
+        name: caregiver_id
+        schema:
+          type: integer
+        description: Filtra históricos pelo ID do cuidador.
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: patient_id
+        schema:
+          type: integer
+        description: Filtra históricos pelo ID do paciente.
+      tags:
+      - History
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedHistoryList'
+          description: ''
+    post:
+      operationId: api_histories_create
+      description: Cria um novo histórico para paciente e cuidador.
+      summary: Criar Histórico
+      tags:
+      - History
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/History'
+          description: ''
+  /api/histories/{id}/:
+    get:
+      operationId: api_histories_retrieve
+      description: Retorna os detalhes de um histórico específico.
+      summary: Obter Histórico
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - History
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/History'
+          description: ''
+    put:
+      operationId: api_histories_update
+      description: Atualiza completamente um histórico específico.
+      summary: Atualizar Histórico
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - History
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HistoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/History'
+          description: ''
+    patch:
+      operationId: api_histories_partial_update
+      description: Atualiza parcialmente um histórico específico.
+      summary: Atualizar Parcialmente Histórico
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - History
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedHistoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedHistoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedHistoryRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/History'
+          description: ''
+    delete:
+      operationId: api_histories_destroy
+      description: Remove um histórico do sistema (soft delete).
+      summary: Deletar Histórico
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - History
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/patients/:
     get:
       operationId: api_patients_list
@@ -402,6 +950,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Patient'
+          description: ''
+  /api/patients/{patient_id}/anamnesis/:
+    get:
+      operationId: api_patients_anamnesis_list
+      description: Lista todas as anamneses de um paciente específico
+      summary: Listar Anamneses de um Paciente
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Anamnesis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAnamnesisList'
+          description: ''
+  /api/patients/{patient_id}/anamnesis/caregiver/{caregiver_id}/:
+    get:
+      operationId: api_patients_anamnesis_caregiver_retrieve
+      description: Retorna a anamnese de um paciente específico criada por um cuidador
+        específico
+      summary: Obter Anamnese Específica
+      parameters:
+      - in: path
+        name: caregiver_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Anamnesis
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anamnesis'
+          description: ''
+  /api/patients/{patient_id}/anamnesis/create/:
+    post:
+      operationId: api_patients_anamnesis_create_create
+      description: Cria uma anamnese para um paciente específico. O cuidador deve
+        ser especificado no body da requisição.
+      summary: Criar Anamnese para Paciente
+      parameters:
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Anamnesis
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnamnesisRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Anamnesis'
           description: ''
   /api/patients/{patient_id}/caregivers/:
     get:
@@ -568,6 +1207,172 @@ paths:
               schema:
                 $ref: '#/components/schemas/PatientCaregiverRelationship'
           description: ''
+  /api/patients/{patient_id}/pictograms/:
+    get:
+      operationId: api_patients_pictograms_list
+      description: Utilizado para listar todos os pictogramas vinculados a um paciente
+        específico. Opcionalmente pode filtrar por pictogramas privados usando `?private=true`
+        ou `?private=false`.
+      summary: Listar Pictogramas do Paciente
+      parameters:
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: private
+        schema:
+          type: boolean
+        description: Filtrar apenas pictogramas privados (`true`) ou públicos (`false`)
+          do paciente.
+      tags:
+      - Patient
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientPictogram'
+          description: ''
+  /api/patients/{patient_id}/pictograms/{id}/destroy/:
+    delete:
+      operationId: api_patients_pictograms_destroy_destroy
+      description: Utilizado para desvincular um pictograma de um paciente (marca
+        como inativo)
+      summary: Desvincular Pictograma do Paciente
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/patients/{patient_id}/pictograms/available/:
+    get:
+      operationId: api_patients_pictograms_available_list
+      description: Utilizado para listar pictogramas disponíveis para vincular ao
+        paciente
+      summary: Listar Pictogramas Disponíveis
+      parameters:
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PictogramForPatient'
+          description: ''
+  /api/patients/{patient_id}/pictograms/create/:
+    post:
+      operationId: api_patients_pictograms_create_create
+      description: Utilizado para criar vínculo(s) entre um paciente e pictograma(s).
+        Para múltiplos pictogramas, envie um array no campo "pictograms".
+      summary: Vincular Pictograma(s) ao Paciente
+      parameters:
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: object
+                properties:
+                  pictogram:
+                    type: integer
+                    description: ID do pictograma (para vínculo único)
+                required:
+                - pictogram
+              - type: object
+                properties:
+                  pictograms:
+                    type: array
+                    items:
+                      type: integer
+                    description: Array de IDs dos pictogramas (para múltiplos vínculos)
+                required:
+                - pictograms
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientPictogram'
+          description: ''
+        '400':
+          description: Dados inválidos
+  /api/patients/{patient_id}/pictograms/custom/create/:
+    post:
+      operationId: api_patients_pictograms_custom_create_create
+      description: Cria um pictograma privado e já o vincula ao paciente em uma única
+        operação. Se qualquer etapa falhar, nada é salvo.
+      summary: Adicionar Pictograma Personalizado
+      parameters:
+      - in: path
+        name: patient_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Patient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientCustomPictogramCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientCustomPictogramCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientCustomPictogramCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientPictogram'
+          description: ''
+        '400':
+          description: Dados inválidos
   /api/patients/{id}/:
     get:
       operationId: api_patients_retrieve
@@ -672,6 +1477,159 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/person/{person_id}/make-caregiver/:
+    patch:
+      operationId: api_person_make_caregiver_partial_update
+      description: Atualiza uma pessoa existente para se tornar cuidador. Apenas marca
+        o campo is_caregiver como True. **Requer autenticação.**
+      summary: Tornar Pessoa em Cuidador
+      parameters:
+      - in: path
+        name: person_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Person
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                profession:
+                  type: string
+                  description: Profissão ou ocupação do cuidador (opcional)
+                  example: Enfermeiro
+              required: []
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Pessoa atualizada para cuidador com sucesso
+                content:
+                  application/json:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      is_caregiver:
+                        type: boolean
+                      updated_fields:
+                        type: object
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Pessoa já é cuidador ou dados inválidos
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                description: Não autenticado
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                description: Sem permissão
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Pessoa não encontrada
+          description: ''
+  /api/person/{person_id}/make-patient/:
+    patch:
+      operationId: api_person_make_patient_partial_update
+      description: Atualiza uma pessoa existente para se tornar paciente. Marca o
+        campo is_patient como True e permite atualizar campos específicos do paciente.
+        **Requer autenticação.**
+      summary: Tornar Pessoa em Paciente
+      parameters:
+      - in: path
+        name: person_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Person
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cid:
+                  type: string
+                  description: Classificação Internacional de Doenças (opcional)
+                  example: F84.0
+                colors:
+                  type: string
+                  description: Cores que o paciente gosta ou tem preferência (opcional)
+                  example: Azul, Verde, Amarelo
+                sounds:
+                  type: string
+                  description: Sons, toques ou músicas que o paciente aprecia (opcional)
+                  example: Música clássica, sons da natureza
+                smells:
+                  type: string
+                  description: Cheiros que o paciente gosta ou reconhece (opcional)
+                  example: Lavanda, café, flores
+                hobbies:
+                  type: string
+                  description: Atividades e hobbies do paciente (opcional)
+                  example: Pintura, música, jogos
+              required: []
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Pessoa atualizada para paciente com sucesso
+                content:
+                  application/json:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      is_patient:
+                        type: boolean
+                      updated_fields:
+                        type: object
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Pessoa já é paciente ou dados inválidos
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                description: Não autenticado
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                description: Sem permissão
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Pessoa não encontrada
+          description: ''
   /api/person/cpf/{cpf}/:
     get:
       operationId: api_person_cpf_retrieve
@@ -687,6 +1645,7 @@ paths:
       - Person
       security:
       - jwtAuth: []
+      - {}
       responses:
         '200':
           content:
@@ -712,6 +1671,11 @@ paths:
         description: A page number within the paginated result set.
         schema:
           type: integer
+      - in: query
+        name: private
+        schema:
+          type: boolean
+        description: Filtrar por pictogramas privados (true/false)
       tags:
       - Pictogram
       security:
@@ -1009,7 +1973,15 @@ paths:
       - jwtAuth: []
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCaregiverRelationshipInactivateResponse'
+          description: ''
+        '400':
+          description: Relacionamento já está inativo
+        '404':
+          description: Relacionamento não encontrado
   /api/user/{user_id}/person/:
     get:
       operationId: api_user_person_retrieve
@@ -1026,6 +1998,7 @@ paths:
       - Person
       security:
       - jwtAuth: []
+      - {}
       responses:
         '200':
           content:
@@ -1039,6 +2012,72 @@ paths:
               schema:
                 description: Usuário não encontrado ou não possui pessoa associada
           description: ''
+  /authentication/change-password/:
+    post:
+      operationId: authentication_change_password_create
+      description: Recebe usuario, senha atual e nova senha. Se validos, altera a
+        senha.
+      summary: Alterar senha
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Senha alterada com sucesso
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Dados invalidos
+          description: ''
+  /authentication/forgot-password/:
+    post:
+      operationId: authentication_forgot_password_create
+      description: Recebe um e-mail e, se cadastrado, gera e envia uma nova senha
+        temporaria.
+      summary: Solicitar redefinicao de senha
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Solicitacao processada com sucesso
+          description: ''
   /authentication/logout/:
     post:
       operationId: authentication_logout_create
@@ -1046,7 +2085,7 @@ paths:
         Takes a set of user credentials and returns an access and refresh JSON web
         token pair to prove the authentication of those credentials.
       tags:
-      - authentication
+      - Authentication
       requestBody:
         content:
           application/json:
@@ -1073,7 +2112,7 @@ paths:
         Takes a refresh type JSON web token and returns an access type JSON web
         token if the refresh token is valid.
       tags:
-      - authentication
+      - Authentication
       requestBody:
         content:
           application/json:
@@ -1100,7 +2139,7 @@ paths:
         Takes a set of user credentials and returns an access and refresh JSON web
         token pair to prove the authentication of those credentials.
       tags:
-      - authentication
+      - Authentication
       requestBody:
         content:
           application/json:
@@ -1127,7 +2166,7 @@ paths:
         Takes a set of user credentials and returns an access and refresh JSON web
         token pair to prove the authentication of those credentials.
       tags:
-      - authentication
+      - Authentication
       requestBody:
         content:
           application/json:
@@ -1149,6 +2188,343 @@ paths:
           description: ''
 components:
   schemas:
+    Anamnesis:
+      type: object
+      description: Serializer completo para Anamnesis
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente para quem a anamnese está sendo criada
+        patient_name:
+          type: string
+          readOnly: true
+          description: Nome do paciente
+        patient_cpf:
+          type: string
+          readOnly: true
+          description: CPF do paciente
+        caregiver:
+          type: integer
+          nullable: true
+          title: Cuidador
+          description: ID do cuidador que está criando a anamnese
+        caregiver_name:
+          type: string
+          readOnly: true
+          description: Nome do cuidador
+        main_diagnosis:
+          type: string
+          nullable: true
+          title: Diagnóstico Principal
+          description: Diagnóstico médico principal do paciente
+          maxLength: 200
+        associated_conditions:
+          type: string
+          nullable: true
+          title: Condições Associadas
+          description: Outras condições médicas ou comorbidades
+        allergies:
+          type: string
+          nullable: true
+          title: Alergias
+          description: Alergias conhecidas do paciente
+        medications:
+          type: string
+          nullable: true
+          title: Medicações
+          description: Medicamentos em uso atual
+        communication_methods:
+          type: string
+          nullable: true
+          title: Formas de Comunicação
+          description: Métodos de comunicação utilizados pelo paciente
+        spoken_words:
+          type: string
+          nullable: true
+          title: Palavras Faladas
+          description: Palavras que o paciente consegue falar ou entender
+        preferred_pictograms:
+          type: string
+          nullable: true
+          title: Pictogramas Preferidos
+          description: Pictogramas ou símbolos preferidos pelo paciente
+        dietary_restrictions:
+          type: string
+          nullable: true
+          title: Restrições Alimentares
+          description: Alimentos que devem ser evitados ou restrições específicas
+        food_preferences:
+          type: string
+          nullable: true
+          title: Preferências Alimentares
+          description: Alimentos favoritos ou preferências do paciente
+        feeding_difficulties:
+          type: string
+          nullable: true
+          title: Dificuldades na Alimentação
+          description: Problemas ou dificuldades relacionadas à alimentação
+        needs_expression:
+          type: string
+          nullable: true
+          title: Expressão de Necessidades
+          description: Como o paciente expressa suas necessidades e desejos
+        frustration_reactions:
+          type: string
+          nullable: true
+          title: Reações à Frustração
+          description: Como o paciente reage quando frustrado ou irritado
+        general_observations:
+          type: string
+          nullable: true
+          title: Observações Gerais
+          description: Observações adicionais importantes sobre o paciente
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou o registro
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - caregiver_name
+      - created_at
+      - created_by
+      - created_by_username
+      - id
+      - patient
+      - patient_cpf
+      - patient_name
+      - updated_at
+    AnamnesisList:
+      type: object
+      description: Serializer simplificado para listagem de anamneses
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: Paciente
+          description: Paciente para quem a anamnese foi criada
+        patient_name:
+          type: string
+          readOnly: true
+          description: Nome do paciente
+        caregiver:
+          type: integer
+          nullable: true
+          title: Cuidador
+          description: Cuidador que cadastrou a anamnese
+        caregiver_name:
+          type: string
+          readOnly: true
+          description: Nome do cuidador
+        main_diagnosis:
+          type: string
+          nullable: true
+          title: Diagnóstico Principal
+          description: Diagnóstico médico principal do paciente
+          maxLength: 200
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - caregiver_name
+      - created_at
+      - id
+      - patient
+      - patient_name
+      - updated_at
+    AnamnesisRequest:
+      type: object
+      description: Serializer completo para Anamnesis
+      properties:
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente para quem a anamnese está sendo criada
+        caregiver:
+          type: integer
+          nullable: true
+          title: Cuidador
+          description: ID do cuidador que está criando a anamnese
+        main_diagnosis:
+          type: string
+          nullable: true
+          title: Diagnóstico Principal
+          description: Diagnóstico médico principal do paciente
+          maxLength: 200
+        associated_conditions:
+          type: string
+          nullable: true
+          title: Condições Associadas
+          description: Outras condições médicas ou comorbidades
+        allergies:
+          type: string
+          nullable: true
+          title: Alergias
+          description: Alergias conhecidas do paciente
+        medications:
+          type: string
+          nullable: true
+          title: Medicações
+          description: Medicamentos em uso atual
+        communication_methods:
+          type: string
+          nullable: true
+          title: Formas de Comunicação
+          description: Métodos de comunicação utilizados pelo paciente
+        spoken_words:
+          type: string
+          nullable: true
+          title: Palavras Faladas
+          description: Palavras que o paciente consegue falar ou entender
+        preferred_pictograms:
+          type: string
+          nullable: true
+          title: Pictogramas Preferidos
+          description: Pictogramas ou símbolos preferidos pelo paciente
+        dietary_restrictions:
+          type: string
+          nullable: true
+          title: Restrições Alimentares
+          description: Alimentos que devem ser evitados ou restrições específicas
+        food_preferences:
+          type: string
+          nullable: true
+          title: Preferências Alimentares
+          description: Alimentos favoritos ou preferências do paciente
+        feeding_difficulties:
+          type: string
+          nullable: true
+          title: Dificuldades na Alimentação
+          description: Problemas ou dificuldades relacionadas à alimentação
+        needs_expression:
+          type: string
+          nullable: true
+          title: Expressão de Necessidades
+          description: Como o paciente expressa suas necessidades e desejos
+        frustration_reactions:
+          type: string
+          nullable: true
+          title: Reações à Frustração
+          description: Como o paciente reage quando frustrado ou irritado
+        general_observations:
+          type: string
+          nullable: true
+          title: Observações Gerais
+          description: Observações adicionais importantes sobre o paciente
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+      required:
+      - patient
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Nome do Anexo
+          description: Nome descritivo do anexo
+          maxLength: 255
+        file:
+          type: string
+          format: uri
+          title: Arquivo do Anexo
+          description: Arquivo anexado (imagem, PDF, etc.)
+        file_url:
+          type: string
+          readOnly: true
+        patient:
+          type: integer
+          title: Paciente
+          description: Paciente ao qual o anexo pertence
+        history:
+          type: integer
+          nullable: true
+          title: Histórico
+          description: ID do histórico relacionado ao anexo (opcional)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - created_at
+      - file
+      - file_url
+      - id
+      - name
+      - patient
+      - updated_at
+    AttachmentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome do Anexo
+          description: Nome descritivo do anexo
+          maxLength: 255
+        file:
+          type: string
+          format: binary
+          title: Arquivo do Anexo
+          description: Arquivo anexado (imagem, PDF, etc.)
+        patient:
+          type: integer
+          title: Paciente
+          description: Paciente ao qual o anexo pertence
+        history:
+          type: integer
+          nullable: true
+          title: Histórico
+          description: ID do histórico relacionado ao anexo (opcional)
+      required:
+      - file
+      - name
+      - patient
     Caregiver:
       type: object
       description: Serializer para Cuidador
@@ -1257,6 +2633,57 @@ components:
       - id
       - name
       - phone
+      - updated_at
+    CaregiverAnamnesis:
+      type: object
+      description: Serializer para anamneses de um cuidador específico
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: Paciente
+          description: Paciente para quem a anamnese foi criada
+        patient_name:
+          type: string
+          readOnly: true
+          description: Nome do paciente
+        patient_cpf:
+          type: string
+          readOnly: true
+          description: CPF do paciente
+        main_diagnosis:
+          type: string
+          nullable: true
+          title: Diagnóstico Principal
+          description: Diagnóstico médico principal do paciente
+          maxLength: 200
+        associated_conditions:
+          type: string
+          nullable: true
+          title: Condições Associadas
+          description: Outras condições médicas ou comorbidades
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - created_at
+      - id
+      - patient
+      - patient_cpf
+      - patient_name
       - updated_at
     CaregiverForPatient:
       type: object
@@ -1390,8 +2817,9 @@ components:
         password:
           type: string
           writeOnly: true
+          description: Senha para o usuário do sistema (mínimo 8 caracteres) - OBRIGATÓRIO
+            se a pessoa não tiver usuário associado
           minLength: 8
-          description: Senha para o usuário do sistema (mínimo 8 caracteres)
         is_active:
           type: boolean
           title: Ativo
@@ -1400,8 +2828,25 @@ components:
       - cpf
       - email
       - name
-      - password
       - phone
+    ChangePasswordRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        current_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - current_password
+      - new_password
+      - username
     EverydayCategory:
       type: object
       description: Serializer para Categoria do Cotidiano
@@ -1464,6 +2909,197 @@ components:
           description: Indica se a categoria está ativa
       required:
       - name
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    History:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente relacionado ao histórico
+        patient_name:
+          type: string
+          readOnly: true
+          description: Nome do paciente
+        caregiver:
+          type: integer
+          title: Cuidador
+          description: ID do cuidador relacionado ao histórico
+        caregiver_name:
+          type: string
+          readOnly: true
+          description: Nome do cuidador
+        description:
+          type: string
+          title: Descrição
+          description: Descrição textual do histórico
+        attachment_count:
+          type: integer
+          readOnly: true
+          description: Quantidade de anexos vinculados a este histórico
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+          description: Nome do usuário que criou o registro
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de atualização
+      required:
+      - attachment_count
+      - caregiver
+      - caregiver_name
+      - created_at
+      - created_by
+      - created_by_username
+      - description
+      - id
+      - patient
+      - patient_name
+      - updated_at
+    HistoryRequest:
+      type: object
+      properties:
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente relacionado ao histórico
+        caregiver:
+          type: integer
+          title: Cuidador
+          description: ID do cuidador relacionado ao histórico
+        description:
+          type: string
+          minLength: 1
+          title: Descrição
+          description: Descrição textual do histórico
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+      required:
+      - caregiver
+      - description
+      - patient
+    PaginatedAnamnesisList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Anamnesis'
+    PaginatedAnamnesisListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnamnesisList'
+    PaginatedAttachmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+    PaginatedCaregiverAnamnesisList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaregiverAnamnesis'
     PaginatedCaregiverForPatientList:
       type: object
       required:
@@ -1533,6 +3169,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EverydayCategory'
+    PaginatedHistoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/History'
     PaginatedPatientCaregiverListList:
       type: object
       required:
@@ -1625,6 +3284,112 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Pictogram'
+    PatchedAnamnesisRequest:
+      type: object
+      description: Serializer completo para Anamnesis
+      properties:
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente para quem a anamnese está sendo criada
+        caregiver:
+          type: integer
+          nullable: true
+          title: Cuidador
+          description: ID do cuidador que está criando a anamnese
+        main_diagnosis:
+          type: string
+          nullable: true
+          title: Diagnóstico Principal
+          description: Diagnóstico médico principal do paciente
+          maxLength: 200
+        associated_conditions:
+          type: string
+          nullable: true
+          title: Condições Associadas
+          description: Outras condições médicas ou comorbidades
+        allergies:
+          type: string
+          nullable: true
+          title: Alergias
+          description: Alergias conhecidas do paciente
+        medications:
+          type: string
+          nullable: true
+          title: Medicações
+          description: Medicamentos em uso atual
+        communication_methods:
+          type: string
+          nullable: true
+          title: Formas de Comunicação
+          description: Métodos de comunicação utilizados pelo paciente
+        spoken_words:
+          type: string
+          nullable: true
+          title: Palavras Faladas
+          description: Palavras que o paciente consegue falar ou entender
+        preferred_pictograms:
+          type: string
+          nullable: true
+          title: Pictogramas Preferidos
+          description: Pictogramas ou símbolos preferidos pelo paciente
+        dietary_restrictions:
+          type: string
+          nullable: true
+          title: Restrições Alimentares
+          description: Alimentos que devem ser evitados ou restrições específicas
+        food_preferences:
+          type: string
+          nullable: true
+          title: Preferências Alimentares
+          description: Alimentos favoritos ou preferências do paciente
+        feeding_difficulties:
+          type: string
+          nullable: true
+          title: Dificuldades na Alimentação
+          description: Problemas ou dificuldades relacionadas à alimentação
+        needs_expression:
+          type: string
+          nullable: true
+          title: Expressão de Necessidades
+          description: Como o paciente expressa suas necessidades e desejos
+        frustration_reactions:
+          type: string
+          nullable: true
+          title: Reações à Frustração
+          description: Como o paciente reage quando frustrado ou irritado
+        general_observations:
+          type: string
+          nullable: true
+          title: Observações Gerais
+          description: Observações adicionais importantes sobre o paciente
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+    PatchedAttachmentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nome do Anexo
+          description: Nome descritivo do anexo
+          maxLength: 255
+        file:
+          type: string
+          format: binary
+          title: Arquivo do Anexo
+          description: Arquivo anexado (imagem, PDF, etc.)
+        patient:
+          type: integer
+          title: Paciente
+          description: Paciente ao qual o anexo pertence
+        history:
+          type: integer
+          nullable: true
+          title: Histórico
+          description: ID do histórico relacionado ao anexo (opcional)
     PatchedCaregiverRequest:
       type: object
       description: Serializer para Cuidador
@@ -1704,8 +3469,9 @@ components:
         password:
           type: string
           writeOnly: true
+          description: Senha para o usuário do sistema (mínimo 8 caracteres) - OBRIGATÓRIO
+            se a pessoa não tiver usuário associado
           minLength: 8
-          description: Senha para o usuário do sistema (mínimo 8 caracteres)
         is_active:
           type: boolean
           title: Ativo
@@ -1724,6 +3490,26 @@ components:
           type: boolean
           title: Ativo
           description: Indica se a categoria está ativa
+    PatchedHistoryRequest:
+      type: object
+      properties:
+        patient:
+          type: integer
+          title: Paciente
+          description: ID do paciente relacionado ao histórico
+        caregiver:
+          type: integer
+          title: Cuidador
+          description: ID do cuidador relacionado ao histórico
+        description:
+          type: string
+          minLength: 1
+          title: Descrição
+          description: Descrição textual do histórico
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
     PatchedPatientCaregiverRelationshipRequest:
       type: object
       description: Serializer para Relacionamento Paciente-Cuidador
@@ -1860,8 +3646,9 @@ components:
         password:
           type: string
           writeOnly: true
+          description: Senha para o usuário do sistema (mínimo 8 caracteres) - OBRIGATÓRIO
+            se a pessoa não tiver usuário associado
           minLength: 8
-          description: Senha para o usuário do sistema (mínimo 8 caracteres)
         is_active:
           type: boolean
           title: Ativo
@@ -1900,6 +3687,11 @@ components:
           type: boolean
           title: Ativo
           description: Indica se o pictograma está ativo
+        private:
+          type: boolean
+          title: Privado para um paciente
+          description: Se marcado esse pictograma será disponibilizado apenas para
+            o paciente que foi vinculado a ele
     Patient:
       type: object
       description: Serializer para Paciente
@@ -2168,6 +3960,16 @@ components:
       - relationship_type_display
       - start_date
       - updated_at
+    PatientCaregiverRelationshipInactivateResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        relationship:
+          $ref: '#/components/schemas/PatientCaregiverRelationship'
+      required:
+      - detail
+      - relationship
     PatientCaregiverRelationshipRequest:
       type: object
       description: Serializer para Relacionamento Paciente-Cuidador
@@ -2211,6 +4013,37 @@ components:
       - patient
       - relationship_type
       - start_date
+    PatientCustomPictogramCreateRequest:
+      type: object
+      description: |-
+        Serializer para criar um pictograma personalizado e vinculá-lo ao paciente
+        em uma única operação.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Nome do pictograma
+          maxLength: 100
+        category:
+          type: integer
+          description: ID da categoria do cotidiano
+        image:
+          type: string
+          format: binary
+          description: Arquivo de imagem do pictograma
+        audio:
+          type: string
+          format: binary
+          nullable: true
+          description: Arquivo de áudio do pictograma (opcional)
+        description:
+          type: string
+          nullable: true
+          description: Descrição adicional do pictograma
+      required:
+      - category
+      - image
+      - name
     PatientForCaregiver:
       type: object
       description: Serializer para mostrar pacientes de um cuidador
@@ -2221,6 +4054,8 @@ components:
         patient_id:
           type: integer
         patient_name:
+          type: string
+        patient_cpf:
           type: string
         patient_email:
           type: string
@@ -2255,8 +4090,26 @@ components:
           type: boolean
           title: Ativo
           description: Indica se o registro está ativo no sistema
+        inactivated_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Data de inativação
+          description: Data em que o registro foi inativado
+        inactivated_by_username:
+          type: string
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
       required:
+      - created_at
       - id
+      - inactivated_by_username
+      - patient_cpf
       - patient_email
       - patient_id
       - patient_name
@@ -2264,6 +4117,66 @@ components:
       - relationship_type
       - relationship_type_display
       - start_date
+    PatientPictogram:
+      type: object
+      description: Serializer para PatientPictogram - usado para listar pictogramas
+        do paciente
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        pictogram:
+          type: integer
+          title: Pictograma
+          description: Pictograma vinculado ao paciente
+        pictogram_name:
+          type: string
+          readOnly: true
+        pictogram_category:
+          type: string
+          readOnly: true
+        pictogram_image_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        pictogram_audio_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        pictogram_description:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          title: Ativo
+          description: Indica se o registro está ativo no sistema
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Data de criação
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Criado por
+          description: Usuário que criou o registro
+        created_by_username:
+          type: string
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - created_by_username
+      - id
+      - pictogram
+      - pictogram_audio_url
+      - pictogram_category
+      - pictogram_description
+      - pictogram_image_url
+      - pictogram_name
     PatientRequest:
       type: object
       description: Serializer para Paciente
@@ -2362,8 +4275,9 @@ components:
         password:
           type: string
           writeOnly: true
+          description: Senha para o usuário do sistema (mínimo 8 caracteres) - OBRIGATÓRIO
+            se a pessoa não tiver usuário associado
           minLength: 8
-          description: Senha para o usuário do sistema (mínimo 8 caracteres)
         is_active:
           type: boolean
           title: Ativo
@@ -2372,7 +4286,6 @@ components:
       - cpf
       - email
       - name
-      - password
       - phone
     Person:
       type: object
@@ -2594,6 +4507,11 @@ components:
           type: boolean
           title: Ativo
           description: Indica se o pictograma está ativo
+        private:
+          type: boolean
+          title: Privado para um paciente
+          description: Se marcado esse pictograma será disponibilizado apenas para
+            o paciente que foi vinculado a ele
         created_by:
           type: integer
           readOnly: true
@@ -2628,6 +4546,48 @@ components:
       - image_url
       - name
       - updated_at
+    PictogramForPatient:
+      type: object
+      description: Serializer simplificado para listar pictogramas disponíveis para
+        vincular ao paciente
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Nome do pictograma
+          description: Nome descritivo do pictograma
+          maxLength: 100
+        category_name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          nullable: true
+          title: Descrição
+          description: Descrição adicional do pictograma
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        audio_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        is_default:
+          type: boolean
+          title: Pictograma padrão
+          description: Se marcado, este pictograma será automaticamente vinculado
+            a novos pacientes
+      required:
+      - audio_url
+      - category_name
+      - id
+      - image_url
+      - name
     PictogramRequest:
       type: object
       description: Serializer para Pictogram
@@ -2662,6 +4622,11 @@ components:
           type: boolean
           title: Ativo
           description: Indica se o pictograma está ativo
+        private:
+          type: boolean
+          title: Privado para um paciente
+          description: Se marcado esse pictograma será disponibilizado apenas para
+            o paciente que foi vinculado a ele
       required:
       - category
       - image
@@ -2744,3 +4709,8 @@ tags:
   description: Operações relacionadas aos pacientes
 - name: Caregiver
   description: Operações relacionadas aos cuidadores
+- name: History
+  description: Operações relacionadas aos históricos dos pacientes
+- name: Attachment
+  description: Operações relacionadas aos anexos dos pacientes, com vínculo opcional
+    a um histórico

@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from ..models import Person, PatientCaregiverRelationship, PatientPictogram, Pictogram
 from ..serializers import (
     PatientSerializer, 
@@ -287,7 +287,7 @@ class PatientPictogramCreateView(APIView):
         },
         responses={
             201: PatientPictogramSerializer(many=True),
-            400: "Dados inválidos"
+            400: OpenApiResponse(description='Dados inválidos')
         }
     )
     def post(self, request, *args, **kwargs):
@@ -369,7 +369,7 @@ class PatientCustomPictogramCreateView(APIView):
         request=PatientCustomPictogramCreateSerializer,
         responses={
             201: PatientPictogramSerializer,
-            400: "Dados inválidos"
+            400: OpenApiResponse(description='Dados inválidos')
         }
     )
     def post(self, request, *args, **kwargs):

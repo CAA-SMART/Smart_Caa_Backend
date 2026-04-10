@@ -1,5 +1,6 @@
 from django.db import models
 from .base import BaseModel
+from .history import History
 from .person import Person
 
 class Attachment(BaseModel):
@@ -23,6 +24,15 @@ class Attachment(BaseModel):
         verbose_name="Paciente",
         help_text="Paciente ao qual o anexo pertence",
         limit_choices_to={'is_patient': True}
+    )
+    history = models.ForeignKey(
+        History,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attachments",
+        verbose_name="Histórico",
+        help_text="Histórico ao qual o anexo pode estar vinculado"
     )
     
     class Meta:

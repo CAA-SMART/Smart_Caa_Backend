@@ -1,3 +1,4 @@
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from drf_spectacular.types import OpenApiTypes
@@ -15,7 +16,11 @@ class HistoryCreateListView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        queryset = History.objects.filter(is_active=True)
+        queryset = History.objects.filter(is_active=True).select_related(
+            'patient', 'caregiver', 'created_by'
+        ).annotate(
+            attachment_count=Count('attachments', filter=Q(attachments__is_active=True), distinct=True)
+        ).order_by('-created_at', 'patient__name', 'caregiver__name')
 
         patient_id = self.request.query_params.get('patient_id')
         caregiver_id = self.request.query_params.get('caregiver_id')
@@ -32,7 +37,7 @@ class HistoryCreateListView(generics.ListCreateAPIView):
 
     @extend_schema(
         summary='Listar Históricos',
-        description='Lista históricos ativos. Permite filtros por patient_id e caregiver_id via query parameters.',
+        description='Lista históricos ativos. Permite filtros por `patient_id` e `caregiver_id` via query parameters e retorna `attachment_count` para cada item.',
         parameters=[
             OpenApiParameter(
                 name='patient_id',
@@ -70,7 +75,11 @@ class HistoryRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return History.objects.filter(is_active=True)
+        return History.objects.filter(is_active=True).select_related(
+            'patient', 'caregiver', 'created_by'
+        ).annotate(
+            attachment_count=Count('attachments', filter=Q(attachments__is_active=True), distinct=True)
+        )
 
     @extend_schema(
         summary='Obter Histórico',
