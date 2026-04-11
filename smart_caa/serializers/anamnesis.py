@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from drf_spectacular.utils import extend_schema_field
-from ..models import Anamnesis, Person
+from ..models import Anamnesis
 
 
 class AnamnesisSerializer(serializers.ModelSerializer):
@@ -45,17 +44,22 @@ class AnamnesisSerializer(serializers.ModelSerializer):
             'caregiver_name',
             'main_diagnosis',
             'associated_conditions',
-            'allergies',
-            'medications',
-            'communication_methods',
-            'spoken_words',
-            'preferred_pictograms',
-            'dietary_restrictions',
-            'food_preferences',
-            'feeding_difficulties',
-            'needs_expression',
-            'frustration_reactions',
-            'general_observations',
+            'responsible_contact',
+            'reference_professional',
+            'cognitive_level',
+            'auditory_comprehension',
+            'memory_profile',
+            'attention_duration',
+            'learning_pace',
+            'language_style',
+            'functional_speech',
+            'speech_intelligibility',
+            'uses_gestures',
+            'uses_signs',
+            'uses_images_or_symbols',
+            'preferred_symbol_systems',
+            'symbol_comprehension',
+            'communication_priorities',
             'is_active',
             'created_by',
             'created_by_username',
@@ -71,43 +75,58 @@ class AnamnesisSerializer(serializers.ModelSerializer):
                 'help_text': 'ID do cuidador que está criando a anamnese'
             },
             'main_diagnosis': {
-                'help_text': 'Diagnóstico médico principal do paciente'
+                'help_text': 'Diagnóstico principal do paciente'
             },
             'associated_conditions': {
-                'help_text': 'Outras condições médicas ou comorbidades'
+                'help_text': 'Comorbidades ou diagnósticos secundários'
             },
-            'allergies': {
-                'help_text': 'Alergias conhecidas do paciente'
+            'responsible_contact': {
+                'help_text': 'Contato do responsável ou cuidador'
             },
-            'medications': {
-                'help_text': 'Medicamentos em uso atual'
+            'reference_professional': {
+                'help_text': 'Profissional de referência que acompanha o paciente'
             },
-            'communication_methods': {
-                'help_text': 'Métodos de comunicação utilizados pelo paciente'
+            'cognitive_level': {
+                'help_text': 'Nível cognitivo estimado do paciente'
             },
-            'spoken_words': {
-                'help_text': 'Palavras que o paciente consegue falar ou entender'
+            'attention_duration': {
+                'help_text': 'Tempo ou nível de atenção/concentração'
             },
-            'preferred_pictograms': {
-                'help_text': 'Pictogramas ou símbolos preferidos pelo paciente'
+            'memory_profile': {
+                'help_text': 'Perfil de memória visual e/ou auditiva'
             },
-            'dietary_restrictions': {
-                'help_text': 'Alimentos que devem ser evitados ou restrições específicas'
+            'learning_pace': {
+                'help_text': 'Velocidade ou facilidade de aprendizado'
             },
-            'food_preferences': {
-                'help_text': 'Alimentos favoritos ou preferências do paciente'
+            'language_style': {
+                'help_text': 'Se a compreensão é mais literal, figurada ou ambas'
             },
-            'feeding_difficulties': {
-                'help_text': 'Problemas ou dificuldades relacionadas à alimentação'
+            'functional_speech': {
+                'help_text': 'Se possui fala funcional: não, parcial ou completa'
             },
-            'needs_expression': {
-                'help_text': 'Como o paciente expressa suas necessidades e desejos'
+            'speech_intelligibility': {
+                'help_text': 'Nível de inteligibilidade da fala'
             },
-            'frustration_reactions': {
-                'help_text': 'Como o paciente reage quando frustrado ou irritado'
+            'auditory_comprehension': {
+                'help_text': 'Compreensão auditiva de palavras, frases ou comandos'
             },
-            'general_observations': {
-                'help_text': 'Observações adicionais importantes sobre o paciente'
+            'uses_gestures': {
+                'help_text': 'Indica se o paciente utiliza gestos naturais'
+            },
+            'uses_signs': {
+                'help_text': 'Indica se o paciente utiliza sinais/Libras'
+            },
+            'uses_images_or_symbols': {
+                'help_text': 'Indica se o paciente utiliza imagens, figuras ou símbolos'
+            },
+            'preferred_symbol_systems': {
+                'help_text': 'Sistemas de símbolos preferidos, como Arasaac ou fotografias'
+            },
+            'symbol_comprehension': {
+                'help_text': 'Nível de compreensão dos símbolos apresentados'
+            },
+            'communication_priorities': {
+                'help_text': 'Principais necessidades comunicativas do paciente'
             }
         }
 
@@ -192,6 +211,8 @@ class AnamnesisListSerializer(serializers.ModelSerializer):
             'caregiver',
             'caregiver_name',
             'main_diagnosis',
+            'cognitive_level',
+            'functional_speech',
             'is_active',
             'created_at',
             'updated_at'
@@ -224,6 +245,8 @@ class CaregiverAnamnesisSerializer(serializers.ModelSerializer):
             'patient_cpf',
             'main_diagnosis',
             'associated_conditions',
+            'cognitive_level',
+            'functional_speech',
             'is_active',
             'created_at',
             'updated_at'

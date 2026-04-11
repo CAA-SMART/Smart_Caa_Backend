@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from django.shortcuts import get_object_or_404
 from ..models import Anamnesis, Person
 from ..serializers import (
@@ -11,11 +11,41 @@ from ..serializers import (
 )
 
 
+ANAMNESIS_SWAGGER_EXAMPLE = OpenApiExample(
+    'Ficha de anamnese - ordem por seções 1, 3 e 4',
+    summary='Exemplo de payload da anamnese na mesma ordem do documento',
+    value={
+        'patient': 1,
+        'caregiver': 2,
+        'main_diagnosis': 'TEA',
+        'associated_conditions': 'TDAH',
+        'responsible_contact': 'Maria Silva - (11) 99999-0000',
+        'reference_professional': 'Dra. Ana - Fonoaudióloga',
+        'cognitive_level': 'Moderado',
+        'auditory_comprehension': 'Compreende frases simples',
+        'memory_profile': 'Melhor memória visual',
+        'attention_duration': '10-15 minutos',
+        'learning_pace': 'Normal',
+        'language_style': 'Literal',
+        'functional_speech': 'Sim, parcial',
+        'speech_intelligibility': 'Pouco inteligível',
+        'uses_gestures': True,
+        'uses_signs': False,
+        'uses_images_or_symbols': True,
+        'preferred_symbol_systems': 'Arasaac, Fotografias',
+        'symbol_comprehension': 'Muitos',
+        'communication_priorities': 'Expressar necessidades, socializar'
+    },
+    request_only=True,
+)
+
+
 @extend_schema(tags=['Anamnesis'])
 class AnamnesisCreateListView(generics.ListCreateAPIView):
     """
     View para listar e criar anamneses
     """
+    serializer_class = AnamnesisSerializer
     permission_classes = (IsAuthenticated,)
     
     def get_serializer_class(self):
@@ -29,14 +59,18 @@ class AnamnesisCreateListView(generics.ListCreateAPIView):
     
     @extend_schema(
         summary='Listar Anamneses',
-        description='Lista todas as anamneses ativas no sistema. **Requer autenticação.**'
+        description='Lista todas as anamneses ativas no sistema, seguindo a ordem das seções 1 (dados pessoais e diagnóstico), 3 (habilidades cognitivas) e 4 (comunicação atual). **Requer autenticação.**',
+        responses={200: AnamnesisListSerializer(many=True)}
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
     
     @extend_schema(
         summary='Criar Anamnese',
-        description='Cria uma nova anamnese para um paciente. Apenas uma anamnese por paciente/cuidador é permitida. **Requer autenticação.**'
+        description='Cria uma nova anamnese para um paciente usando a ficha reestruturada com as seções 1 (dados pessoais e diagnóstico), 3 (habilidades cognitivas) e 4 (comunicação atual). Apenas uma anamnese por paciente/cuidador é permitida. **Requer autenticação.**',
+        request=AnamnesisSerializer,
+        responses={201: AnamnesisSerializer},
+        examples=[ANAMNESIS_SWAGGER_EXAMPLE]
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -60,21 +94,28 @@ class AnamnesisRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     
     @extend_schema(
         summary='Obter Anamnese',
-        description='Retorna os detalhes de uma anamnese específica'
+        description='Retorna os detalhes completos da anamnese na ordem das seções 1, 3 e 4 do documento.',
+        responses={200: AnamnesisSerializer}
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
     
     @extend_schema(
         summary='Atualizar Anamnese',
-        description='Atualiza completamente uma anamnese específica'
+        description='Atualiza completamente uma anamnese específica preservando a ordem das seções 1, 3 e 4.',
+        request=AnamnesisSerializer,
+        responses={200: AnamnesisSerializer},
+        examples=[ANAMNESIS_SWAGGER_EXAMPLE]
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
     
     @extend_schema(
         summary='Atualizar Parcialmente Anamnese',
-        description='Atualiza parcialmente uma anamnese específica'
+        description='Atualiza parcialmente os campos da anamnese seguindo a ordem das seções 1, 3 e 4.',
+        request=AnamnesisSerializer,
+        responses={200: AnamnesisSerializer},
+        examples=[ANAMNESIS_SWAGGER_EXAMPLE]
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
@@ -111,7 +152,8 @@ class CaregiverAnamnesisListView(generics.ListAPIView):
     
     @extend_schema(
         summary='Listar Anamneses de um Cuidador',
-        description='Lista todas as anamneses criadas por um cuidador específico'
+        description='Lista as anamneses criadas por um cuidador específico com os dados principais da ficha atualizada.',
+        responses={200: CaregiverAnamnesisSerializer(many=True)}
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -138,7 +180,8 @@ class PatientAnamnesisListView(generics.ListAPIView):
     
     @extend_schema(
         summary='Listar Anamneses de um Paciente',
-        description='Lista todas as anamneses de um paciente específico'
+        description='Lista todas as anamneses de um paciente específico com os campos completos na ordem das seções 1, 3 e 4.',
+        responses={200: AnamnesisSerializer(many=True)}
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -172,7 +215,8 @@ class PatientCaregiverAnamnesisView(generics.RetrieveAPIView):
     
     @extend_schema(
         summary='Obter Anamnese Específica',
-        description='Retorna a anamnese de um paciente específico criada por um cuidador específico'
+        description='Retorna a anamnese de um paciente específico criada por um cuidador específico, incluindo os campos na ordem das seções 1, 3 e 4.',
+        responses={200: AnamnesisSerializer}
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
@@ -188,7 +232,10 @@ class CreatePatientAnamnesisView(generics.CreateAPIView):
     
     @extend_schema(
         summary='Criar Anamnese para Paciente',
-        description='Cria uma anamnese para um paciente específico. O cuidador deve ser especificado no body da requisição.'
+        description='Cria uma anamnese para um paciente específico com a ficha reestruturada na ordem das seções 1, 3 e 4. O cuidador deve ser especificado no body da requisição.',
+        request=AnamnesisSerializer,
+        responses={201: AnamnesisSerializer},
+        examples=[ANAMNESIS_SWAGGER_EXAMPLE]
     )
     def post(self, request, *args, **kwargs):
         # Adiciona o patient_id do URL no data
@@ -242,7 +289,8 @@ class GetAnamnesisView(generics.RetrieveAPIView):
     
     @extend_schema(
         summary='Obter Anamnese por IDs',
-        description='Retorna a anamnese usando IDs do paciente e cuidador como query parameters',
+        description='Retorna a anamnese usando IDs do paciente e cuidador como query parameters, incluindo os campos na ordem das seções 1, 3 e 4.',
+        responses={200: AnamnesisSerializer},
         parameters=[
             OpenApiParameter(
                 name='patient_id',

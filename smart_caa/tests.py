@@ -169,6 +169,84 @@ class HistoryListAttachmentCountTests(APITestCase):
         self.assertEqual(results_by_id[self.history_without_attachments.id]['attachment_count'], 0)
 
 
+class PatientRegistrationOptionalFieldsTests(APITestCase):
+    def setUp(self):
+        self.url = reverse('patient-list-create')
+
+    def test_create_patient_accepts_optional_birth_date_and_gender(self):
+        payload = {
+            'name': 'Paciente Cadastro',
+            'cpf': '52998224725',
+            'email': 'paciente.cadastro@example.com',
+            'phone': '11999997777',
+            'birth_date': '2018-05-10',
+            'gender': 'Masculino',
+            'password': 'SenhaForte@123'
+        }
+
+        response = self.client.post(self.url, payload, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['birth_date'], payload['birth_date'])
+        self.assertEqual(response.data['gender'], payload['gender'])
+
+
+class AnamnesisSectionsStructureTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='anamnesis-user', password='123456')
+        self.client.force_authenticate(user=self.user)
+
+        self.patient = Person.objects.create(
+            name='Paciente Anamnese',
+            cpf='62345678901',
+            email='paciente.anamnese@example.com',
+            phone='11999995555',
+            is_patient=True,
+        )
+        self.caregiver = Person.objects.create(
+            name='Cuidadora Anamnese',
+            cpf='72345678901',
+            email='cuidadora.anamnese@example.com',
+            phone='11999996666',
+            is_caregiver=True,
+        )
+        self.url = reverse('patient-anamnesis-create', kwargs={'patient_id': self.patient.id})
+
+    def test_create_anamnesis_with_sections_one_three_and_four(self):
+        payload = {
+            'caregiver': self.caregiver.id,
+            'main_diagnosis': 'TEA',
+            'associated_conditions': 'TDAH',
+            'responsible_contact': 'Maria Silva - (11) 99999-0000',
+            'reference_professional': 'Dra. Ana - Fonoaudióloga',
+            'cognitive_level': 'Moderado',
+            'attention_duration': '10-15 minutos',
+            'memory_profile': 'Melhor memória visual',
+            'learning_pace': 'Normal',
+            'language_style': 'Literal',
+            'auditory_comprehension': 'Compreende frases simples',
+            'functional_speech': 'Sim, parcial',
+            'speech_intelligibility': 'Pouco inteligível',
+            'uses_gestures': True,
+            'uses_signs': False,
+            'uses_images_or_symbols': True,
+            'preferred_symbol_systems': 'Arasaac, Fotografias',
+            'symbol_comprehension': 'Muitos',
+            'communication_priorities': 'Expressar necessidades, socializar'
+        }
+
+        response = self.client.post(self.url, payload, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['reference_professional'], payload['reference_professional'])
+        self.assertEqual(response.data['cognitive_level'], payload['cognitive_level'])
+        self.assertEqual(response.data['functional_speech'], payload['functional_speech'])
+        self.assertTrue(response.data['uses_gestures'])
+        self.assertNotIn('expressive_vocabulary', response.data)
+        self.assertNotIn('communication_methods', response.data)
+        self.assertNotIn('general_observations', response.data)
+
+
 class PatientCustomPictogramCreateViewTests(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='tester', password='123456')

@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse, extend_schema
 from ..models import Person, PatientCaregiverRelationship, PatientPictogram, Pictogram
 from ..serializers import (
     PatientSerializer, 
@@ -18,6 +18,27 @@ from ..serializers import (
     PatientCustomPictogramCreateSerializer,
     PatientPictogramBatchCreateSerializer,
     PictogramForPatientSerializer
+)
+
+
+PATIENT_SWAGGER_EXAMPLE = OpenApiExample(
+    'Cadastro de paciente com data de nascimento e gênero',
+    summary='Exemplo de payload com os novos campos opcionais do paciente',
+    value={
+        'name': 'João Silva Teste',
+        'cpf': '123.456.789-01',
+        'email': 'joao.teste@gmail.com',
+        'phone': '(11) 99999-1111',
+        'birth_date': '2018-05-10',
+        'gender': 'Masculino',
+        'password': 'senhaSegura123',
+        'cid': 'F84.0',
+        'colors': 'Azul, Verde',
+        'sounds': 'Música clássica',
+        'smells': 'Lavanda',
+        'hobbies': 'Pintura, Xadrez'
+    },
+    request_only=True,
 )
 
 
@@ -54,6 +75,7 @@ class PatientCreateListView(generics.ListCreateAPIView):
     @extend_schema(
         summary='Listar Pacientes',
         description='Utilizado para listar todos os pacientes cadastrados no sistema. Opcionalmente pode filtrar por CPF usando o parâmetro ?cpf=12345678901. **Requer autenticação.**',
+        responses={200: PatientSerializer(many=True)},
         parameters=[
             OpenApiParameter(
                 name='cpf',
@@ -69,7 +91,10 @@ class PatientCreateListView(generics.ListCreateAPIView):
     
     @extend_schema(
         summary='Cadastrar Paciente',
-        description='Utilizado para cadastrar um novo paciente. Se o CPF já existir, a pessoa será marcada também como paciente. Este endpoint não requer autenticação.'
+        description='Utilizado para cadastrar um novo paciente. Os campos `birth_date` e `gender` são opcionais. Se o CPF já existir, a pessoa será marcada também como paciente. Este endpoint não requer autenticação.',
+        request=PatientSerializer,
+        responses={201: PatientSerializer},
+        examples=[PATIENT_SWAGGER_EXAMPLE]
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -94,21 +119,28 @@ class PatientRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     
     @extend_schema(
         summary='Obter Paciente',
-        description='Utilizado para obter os dados de um paciente específico'
+        description='Utilizado para obter os dados de um paciente específico',
+        responses={200: PatientSerializer}
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
     
     @extend_schema(
         summary='Atualizar Paciente',
-        description='Utilizado para atualizar completamente os dados de um paciente'
+        description='Utilizado para atualizar completamente os dados de um paciente',
+        request=PatientSerializer,
+        responses={200: PatientSerializer},
+        examples=[PATIENT_SWAGGER_EXAMPLE]
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
     
     @extend_schema(
         summary='Atualizar Parcialmente Paciente',
-        description='Utilizado para atualizar parcialmente os dados de um paciente'
+        description='Utilizado para atualizar parcialmente os dados de um paciente',
+        request=PatientSerializer,
+        responses={200: PatientSerializer},
+        examples=[PATIENT_SWAGGER_EXAMPLE]
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)

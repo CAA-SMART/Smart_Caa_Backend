@@ -230,6 +230,18 @@ class MakePatientView(APIView):
                         'description': 'Classificação Internacional de Doenças (opcional)',
                         'example': 'F84.0'
                     },
+                    'birth_date': {
+                        'type': 'string',
+                        'format': 'date',
+                        'description': 'Data de nascimento do paciente (opcional)',
+                        'example': '2018-05-10'
+                    },
+                    'gender': {
+                        'type': 'string',
+                        'enum': ['Masculino', 'Feminino'],
+                        'description': 'Gênero informado no cadastro do paciente (opcional)',
+                        'example': 'Masculino'
+                    },
                     'colors': {
                         'type': 'string',
                         'description': 'Cores que o paciente gosta ou tem preferência (opcional)',
@@ -294,7 +306,7 @@ class MakePatientView(APIView):
             updated_fields = {}
             
             # Atualiza campos específicos do paciente se fornecidos
-            patient_fields = ['cid', 'colors', 'sounds', 'smells', 'hobbies']
+            patient_fields = ['cid', 'birth_date', 'gender', 'colors', 'sounds', 'smells', 'hobbies']
             for field in patient_fields:
                 value = request.data.get(field)
                 if value:

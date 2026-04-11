@@ -127,6 +127,8 @@ class PersonSerializer(serializers.ModelSerializer):
             'cpf',
             'email',
             'phone',
+            'birth_date',
+            'gender',
             'cid',
             'profession',
             'postal_code',
@@ -190,6 +192,8 @@ class PatientSerializer(serializers.ModelSerializer):
             'cpf',
             'email',
             'phone',
+            'birth_date',
+            'gender',
             'cid',
             'postal_code',
             'state',
@@ -222,6 +226,12 @@ class PatientSerializer(serializers.ModelSerializer):
             },
             'phone': {
                 'help_text': 'Telefone de contato do paciente'
+            },
+            'birth_date': {
+                'help_text': 'Data de nascimento do paciente (opcional)'
+            },
+            'gender': {
+                'help_text': 'Gênero informado no cadastro do paciente (opcional): Masculino ou Feminino'
             },
             'cid': {
                 'help_text': 'Classificação Internacional de Doenças (formato: A00-B99, C00-D48)'
@@ -448,6 +458,8 @@ class CaregiverSerializer(serializers.ModelSerializer):
             'cpf',
             'email',
             'phone',
+            'birth_date',
+            'gender',
             'profession',
             'postal_code',
             'state',
@@ -476,6 +488,12 @@ class CaregiverSerializer(serializers.ModelSerializer):
             },
             'phone': {
                 'help_text': 'Telefone de contato do cuidador'
+            },
+            'birth_date': {
+                'help_text': 'Data de nascimento da pessoa (opcional)'
+            },
+            'gender': {
+                'help_text': 'Gênero informado no cadastro (opcional): Masculino ou Feminino'
             },
             'profession': {
                 'help_text': 'Profissão ou ocupação do cuidador'

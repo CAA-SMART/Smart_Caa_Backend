@@ -29,102 +29,147 @@ class Anamnesis(BaseModel):
         limit_choices_to={'is_caregiver': True}
     )
 
-    # Health History / Histórico de saúde
+    # Seção 1 - Dados pessoais e diagnóstico
     main_diagnosis = models.CharField(
         max_length=200,
         blank=True,
         null=True,
         verbose_name="Diagnóstico Principal",
-        help_text="Diagnóstico médico principal do paciente"
+        help_text="Diagnóstico principal do paciente"
     )
-    
+
     associated_conditions = models.TextField(
         blank=True,
         null=True,
-        verbose_name="Condições Associadas",
-        help_text="Outras condições médicas ou comorbidades"
-    )
-    
-    allergies = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Alergias",
-        help_text="Alergias conhecidas do paciente"
-    )
-    
-    medications = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Medicações",
-        help_text="Medicamentos em uso atual"
+        verbose_name="Comorbidades / Diagnósticos Secundários",
+        help_text="Comorbidades ou diagnósticos secundários relacionados ao paciente"
     )
 
-    # Communication / Comunicação
-    communication_methods = models.TextField(
+    responsible_contact = models.CharField(
+        max_length=200,
         blank=True,
         null=True,
-        verbose_name="Formas de Comunicação",
-        help_text="Métodos de comunicação utilizados pelo paciente"
-    )
-    
-    spoken_words = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Palavras Faladas",
-        help_text="Palavras que o paciente consegue falar ou entender"
-    )
-    
-    preferred_pictograms = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Pictogramas Preferidos",
-        help_text="Pictogramas ou símbolos que o paciente prefere ou reconhece melhor"
+        verbose_name="Contato do Responsável",
+        help_text="Telefone, e-mail ou outro contato do responsável/cuidador"
     )
 
-    # Feeding / Alimentação
-    dietary_restrictions = models.TextField(
+    reference_professional = models.CharField(
+        max_length=200,
         blank=True,
         null=True,
-        verbose_name="Restrições Alimentares",
-        help_text="Alimentos que devem ser evitados ou restrições específicas"
+        verbose_name="Profissional de Referência",
+        help_text="Profissional que acompanha o paciente, como fonoaudiólogo ou terapeuta"
     )
     
-    food_preferences = models.TextField(
+    # Seção 3 - Habilidades cognitivas
+    cognitive_level = models.CharField(
+        max_length=100,
         blank=True,
         null=True,
-        verbose_name="Preferências Alimentares",
-        help_text="Alimentos favoritos ou preferências do paciente"
-    )
-    
-    feeding_difficulties = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Dificuldades na Alimentação",
-        help_text="Problemas ou dificuldades relacionadas à alimentação"
+        verbose_name="Nível Cognitivo",
+        help_text="Nível cognitivo estimado do paciente"
     )
 
-    # Behavioral Aspects / Aspectos comportamentais
-    needs_expression = models.TextField(
+    auditory_comprehension = models.CharField(
+        max_length=150,
         blank=True,
         null=True,
-        verbose_name="Expressão de Necessidades",
-        help_text="Como o paciente expressa suas necessidades e desejos"
-    )
-    
-    frustration_reactions = models.TextField(
-        blank=True,
-        null=True,
-        verbose_name="Reações à Frustração",
-        help_text="Como o paciente reage quando frustrado ou irritado"
+        verbose_name="Compreensão Auditiva",
+        help_text="O quanto o paciente compreende comandos, palavras ou frases"
     )
 
-    # General Observations / Observações gerais
-    general_observations = models.TextField(
+    memory_profile = models.CharField(
+        max_length=150,
         blank=True,
         null=True,
-        verbose_name="Observações Gerais",
-        help_text="Observações adicionais importantes sobre o paciente"
+        verbose_name="Memória",
+        help_text="Perfil de memória visual e/ou auditiva do paciente"
     )
+
+    attention_duration = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Atenção / Concentração",
+        help_text="Tempo ou nível de atenção/concentração do paciente"
+    )
+
+    learning_pace = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Capacidade de Aprendizado",
+        help_text="Velocidade ou facilidade de aprendizado do paciente"
+    )
+
+    language_style = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Linguagem Literal ou Figurada",
+        help_text="Forma predominante de compreensão da linguagem pelo paciente"
+    )
+    
+    # Seção 4 - Comunicação atual
+    functional_speech = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Possui Fala Funcional",
+        help_text="Ex.: não, sim parcial ou sim completa"
+    )
+
+    speech_intelligibility = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Inteligibilidade de Fala",
+        help_text="Nível de inteligibilidade da fala do paciente"
+    )
+
+    uses_gestures = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name="Usa Gestos",
+        help_text="Indica se o paciente utiliza gestos naturais para se comunicar"
+    )
+
+    uses_signs = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name="Usa Sinais",
+        help_text="Indica se o paciente utiliza Libras ou outro sistema de sinais"
+    )
+
+    uses_images_or_symbols = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name="Usa Imagens ou Símbolos",
+        help_text="Indica se já utiliza comunicação por imagens, figuras ou símbolos"
+    )
+
+    preferred_symbol_systems = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Sistemas de Símbolos Preferidos",
+        help_text="Ex.: PCS, Bliss, Arasaac, fotografias, desenhos"
+    )
+
+    symbol_comprehension = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Compreensão de Símbolos",
+        help_text="Nível de compreensão dos símbolos apresentados"
+    )
+
+    communication_priorities = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Necessidades Comunicativas Principais",
+        help_text="Principais necessidades comunicativas do paciente"
+    )
+
 
     class Meta:
         verbose_name = "Anamnese"

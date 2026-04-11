@@ -4,6 +4,12 @@ from django.core.exceptions import ValidationError
 from .base import BaseModel
 
 
+GENDER_CHOICES = [
+    ("Masculino", "Masculino"),
+    ("Feminino", "Feminino"),
+]
+
+
 class Person(BaseModel):
     
     # Relacionamento com usuário do sistema
@@ -41,6 +47,22 @@ class Person(BaseModel):
         unique=True,
         verbose_name="Contato",
         help_text="Número de telefone ou celular"
+    )
+
+    birth_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Data de Nascimento",
+        help_text="Data de nascimento da pessoa"
+    )
+
+    gender = models.CharField(
+        max_length=10,
+        choices=GENDER_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name="Gênero",
+        help_text="Gênero informado no cadastro: Masculino ou Feminino"
     )
     
     cid = models.CharField(

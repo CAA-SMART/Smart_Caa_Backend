@@ -22,6 +22,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     person_cpf = serializers.CharField(source='person.cpf', read_only=True)
     person_email = serializers.EmailField(source='person.email', read_only=True)
     person_phone = serializers.CharField(source='person.phone', read_only=True)
+    person_birth_date = serializers.DateField(source='person.birth_date', read_only=True)
+    person_gender = serializers.CharField(source='person.gender', read_only=True)
     person_profession = serializers.CharField(source='person.profession', read_only=True)
     person_cid = serializers.CharField(source='person.cid', read_only=True)
     
@@ -62,6 +64,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'person_cpf',
             'person_email',
             'person_phone',
+            'person_birth_date',
+            'person_gender',
             'person_profession',
             'person_cid',
             
@@ -93,7 +97,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if not hasattr(instance, 'person') or instance.person is None:
             person_fields = [
                 'person_id', 'person_name', 'person_cpf', 'person_email', 
-                'person_phone', 'person_profession', 'person_cid',
+                'person_phone', 'person_birth_date', 'person_gender', 'person_profession', 'person_cid',
                 'is_patient', 'is_caregiver',
                 'postal_code', 'state', 'city', 'district', 'street', 'number', 'complement',
                 'colors', 'sounds', 'smells', 'hobbies'
@@ -121,6 +125,8 @@ class MyPersonSerializer(serializers.ModelSerializer):
             'cpf',
             'email',
             'phone',
+            'birth_date',
+            'gender',
             'profession',
             'cid',
             'postal_code',

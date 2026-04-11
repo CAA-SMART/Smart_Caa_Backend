@@ -7,7 +7,9 @@ paths:
   /api/anamnesis/:
     get:
       operationId: api_anamnesis_list
-      description: Lista todas as anamneses ativas no sistema. **Requer autenticação.**
+      description: Lista todas as anamneses ativas no sistema, seguindo a ordem das
+        seções 1 (dados pessoais e diagnóstico), 3 (habilidades cognitivas) e 4 (comunicação
+        atual). **Requer autenticação.**
       summary: Listar Anamneses
       parameters:
       - name: page
@@ -29,8 +31,10 @@ paths:
           description: ''
     post:
       operationId: api_anamnesis_create
-      description: Cria uma nova anamnese para um paciente. Apenas uma anamnese por
-        paciente/cuidador é permitida. **Requer autenticação.**
+      description: Cria uma nova anamnese para um paciente usando a ficha reestruturada
+        com as seções 1 (dados pessoais e diagnóstico), 3 (habilidades cognitivas)
+        e 4 (comunicação atual). Apenas uma anamnese por paciente/cuidador é permitida.
+        **Requer autenticação.**
       summary: Criar Anamnese
       tags:
       - Anamnesis
@@ -39,6 +43,30 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AnamnesisRequest'
+            examples:
+              FichaDeAnamnese-OrdemPorSeções1,3E4:
+                value:
+                  patient: 1
+                  caregiver: 2
+                  main_diagnosis: TEA
+                  associated_conditions: TDAH
+                  responsible_contact: Maria Silva - (11) 99999-0000
+                  reference_professional: Dra. Ana - Fonoaudióloga
+                  cognitive_level: Moderado
+                  auditory_comprehension: Compreende frases simples
+                  memory_profile: Melhor memória visual
+                  attention_duration: 10-15 minutos
+                  learning_pace: Normal
+                  language_style: Literal
+                  functional_speech: Sim, parcial
+                  speech_intelligibility: Pouco inteligível
+                  uses_gestures: true
+                  uses_signs: false
+                  uses_images_or_symbols: true
+                  preferred_symbol_systems: Arasaac, Fotografias
+                  symbol_comprehension: Muitos
+                  communication_priorities: Expressar necessidades, socializar
+                summary: Exemplo de payload da anamnese na mesma ordem do documento
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/AnamnesisRequest'
@@ -58,7 +86,8 @@ paths:
   /api/anamnesis/{id}/:
     get:
       operationId: api_anamnesis_retrieve
-      description: Retorna os detalhes de uma anamnese específica
+      description: Retorna os detalhes completos da anamnese na ordem das seções 1,
+        3 e 4 do documento.
       summary: Obter Anamnese
       parameters:
       - in: path
@@ -79,7 +108,8 @@ paths:
           description: ''
     put:
       operationId: api_anamnesis_update
-      description: Atualiza completamente uma anamnese específica
+      description: Atualiza completamente uma anamnese específica preservando a ordem
+        das seções 1, 3 e 4.
       summary: Atualizar Anamnese
       parameters:
       - in: path
@@ -94,6 +124,30 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AnamnesisRequest'
+            examples:
+              FichaDeAnamnese-OrdemPorSeções1,3E4:
+                value:
+                  patient: 1
+                  caregiver: 2
+                  main_diagnosis: TEA
+                  associated_conditions: TDAH
+                  responsible_contact: Maria Silva - (11) 99999-0000
+                  reference_professional: Dra. Ana - Fonoaudióloga
+                  cognitive_level: Moderado
+                  auditory_comprehension: Compreende frases simples
+                  memory_profile: Melhor memória visual
+                  attention_duration: 10-15 minutos
+                  learning_pace: Normal
+                  language_style: Literal
+                  functional_speech: Sim, parcial
+                  speech_intelligibility: Pouco inteligível
+                  uses_gestures: true
+                  uses_signs: false
+                  uses_images_or_symbols: true
+                  preferred_symbol_systems: Arasaac, Fotografias
+                  symbol_comprehension: Muitos
+                  communication_priorities: Expressar necessidades, socializar
+                summary: Exemplo de payload da anamnese na mesma ordem do documento
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/AnamnesisRequest'
@@ -112,7 +166,8 @@ paths:
           description: ''
     patch:
       operationId: api_anamnesis_partial_update
-      description: Atualiza parcialmente uma anamnese específica
+      description: Atualiza parcialmente os campos da anamnese seguindo a ordem das
+        seções 1, 3 e 4.
       summary: Atualizar Parcialmente Anamnese
       parameters:
       - in: path
@@ -127,6 +182,30 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatchedAnamnesisRequest'
+            examples:
+              FichaDeAnamnese-OrdemPorSeções1,3E4:
+                value:
+                  patient: 1
+                  caregiver: 2
+                  main_diagnosis: TEA
+                  associated_conditions: TDAH
+                  responsible_contact: Maria Silva - (11) 99999-0000
+                  reference_professional: Dra. Ana - Fonoaudióloga
+                  cognitive_level: Moderado
+                  auditory_comprehension: Compreende frases simples
+                  memory_profile: Melhor memória visual
+                  attention_duration: 10-15 minutos
+                  learning_pace: Normal
+                  language_style: Literal
+                  functional_speech: Sim, parcial
+                  speech_intelligibility: Pouco inteligível
+                  uses_gestures: true
+                  uses_signs: false
+                  uses_images_or_symbols: true
+                  preferred_symbol_systems: Arasaac, Fotografias
+                  symbol_comprehension: Muitos
+                  communication_priorities: Expressar necessidades, socializar
+                summary: Exemplo de payload da anamnese na mesma ordem do documento
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/PatchedAnamnesisRequest'
@@ -163,7 +242,7 @@ paths:
     get:
       operationId: api_anamnesis_get_retrieve
       description: Retorna a anamnese usando IDs do paciente e cuidador como query
-        parameters
+        parameters, incluindo os campos na ordem das seções 1, 3 e 4.
       summary: Obter Anamnese por IDs
       parameters:
       - in: query
@@ -414,7 +493,8 @@ paths:
   /api/caregivers/{caregiver_id}/anamnesis/:
     get:
       operationId: api_caregivers_anamnesis_list
-      description: Lista todas as anamneses criadas por um cuidador específico
+      description: Lista as anamneses criadas por um cuidador específico com os dados
+        principais da ficha atualizada.
       summary: Listar Anamneses de um Cuidador
       parameters:
       - in: path
@@ -924,8 +1004,9 @@ paths:
           description: ''
     post:
       operationId: api_patients_create
-      description: Utilizado para cadastrar um novo paciente. Se o CPF já existir,
-        a pessoa será marcada também como paciente. Este endpoint não requer autenticação.
+      description: Utilizado para cadastrar um novo paciente. Os campos `birth_date`
+        e `gender` são opcionais. Se o CPF já existir, a pessoa será marcada também
+        como paciente. Este endpoint não requer autenticação.
       summary: Cadastrar Paciente
       tags:
       - Patient
@@ -934,6 +1015,22 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatientRequest'
+            examples:
+              CadastroDePacienteComDataDeNascimentoEGênero:
+                value:
+                  name: João Silva Teste
+                  cpf: 123.456.789-01
+                  email: joao.teste@gmail.com
+                  phone: (11) 99999-1111
+                  birth_date: '2018-05-10'
+                  gender: Masculino
+                  password: senhaSegura123
+                  cid: F84.0
+                  colors: Azul, Verde
+                  sounds: Música clássica
+                  smells: Lavanda
+                  hobbies: Pintura, Xadrez
+                summary: Exemplo de payload com os novos campos opcionais do paciente
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/PatientRequest'
@@ -954,7 +1051,8 @@ paths:
   /api/patients/{patient_id}/anamnesis/:
     get:
       operationId: api_patients_anamnesis_list
-      description: Lista todas as anamneses de um paciente específico
+      description: Lista todas as anamneses de um paciente específico com os campos
+        completos na ordem das seções 1, 3 e 4.
       summary: Listar Anamneses de um Paciente
       parameters:
       - name: page
@@ -983,7 +1081,7 @@ paths:
     get:
       operationId: api_patients_anamnesis_caregiver_retrieve
       description: Retorna a anamnese de um paciente específico criada por um cuidador
-        específico
+        específico, incluindo os campos na ordem das seções 1, 3 e 4.
       summary: Obter Anamnese Específica
       parameters:
       - in: path
@@ -1010,8 +1108,9 @@ paths:
   /api/patients/{patient_id}/anamnesis/create/:
     post:
       operationId: api_patients_anamnesis_create_create
-      description: Cria uma anamnese para um paciente específico. O cuidador deve
-        ser especificado no body da requisição.
+      description: Cria uma anamnese para um paciente específico com a ficha reestruturada
+        na ordem das seções 1, 3 e 4. O cuidador deve ser especificado no body da
+        requisição.
       summary: Criar Anamnese para Paciente
       parameters:
       - in: path
@@ -1026,6 +1125,30 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AnamnesisRequest'
+            examples:
+              FichaDeAnamnese-OrdemPorSeções1,3E4:
+                value:
+                  patient: 1
+                  caregiver: 2
+                  main_diagnosis: TEA
+                  associated_conditions: TDAH
+                  responsible_contact: Maria Silva - (11) 99999-0000
+                  reference_professional: Dra. Ana - Fonoaudióloga
+                  cognitive_level: Moderado
+                  auditory_comprehension: Compreende frases simples
+                  memory_profile: Melhor memória visual
+                  attention_duration: 10-15 minutos
+                  learning_pace: Normal
+                  language_style: Literal
+                  functional_speech: Sim, parcial
+                  speech_intelligibility: Pouco inteligível
+                  uses_gestures: true
+                  uses_signs: false
+                  uses_images_or_symbols: true
+                  preferred_symbol_systems: Arasaac, Fotografias
+                  symbol_comprehension: Muitos
+                  communication_priorities: Expressar necessidades, socializar
+                summary: Exemplo de payload da anamnese na mesma ordem do documento
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/AnamnesisRequest'
@@ -1412,6 +1535,22 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatientRequest'
+            examples:
+              CadastroDePacienteComDataDeNascimentoEGênero:
+                value:
+                  name: João Silva Teste
+                  cpf: 123.456.789-01
+                  email: joao.teste@gmail.com
+                  phone: (11) 99999-1111
+                  birth_date: '2018-05-10'
+                  gender: Masculino
+                  password: senhaSegura123
+                  cid: F84.0
+                  colors: Azul, Verde
+                  sounds: Música clássica
+                  smells: Lavanda
+                  hobbies: Pintura, Xadrez
+                summary: Exemplo de payload com os novos campos opcionais do paciente
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/PatientRequest'
@@ -1445,6 +1584,22 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatchedPatientRequest'
+            examples:
+              CadastroDePacienteComDataDeNascimentoEGênero:
+                value:
+                  name: João Silva Teste
+                  cpf: 123.456.789-01
+                  email: joao.teste@gmail.com
+                  phone: (11) 99999-1111
+                  birth_date: '2018-05-10'
+                  gender: Masculino
+                  password: senhaSegura123
+                  cid: F84.0
+                  colors: Azul, Verde
+                  sounds: Música clássica
+                  smells: Lavanda
+                  hobbies: Pintura, Xadrez
+                summary: Exemplo de payload com os novos campos opcionais do paciente
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/PatchedPatientRequest'
@@ -1570,6 +1725,18 @@ paths:
                   type: string
                   description: Classificação Internacional de Doenças (opcional)
                   example: F84.0
+                birth_date:
+                  type: string
+                  format: date
+                  description: Data de nascimento do paciente (opcional)
+                  example: '2018-05-10'
+                gender:
+                  type: string
+                  enum:
+                  - Masculino
+                  - Feminino
+                  description: Gênero informado no cadastro do paciente (opcional)
+                  example: Masculino
                 colors:
                   type: string
                   description: Cores que o paciente gosta ou tem preferência (opcional)
@@ -2220,68 +2387,104 @@ components:
           type: string
           nullable: true
           title: Diagnóstico Principal
-          description: Diagnóstico médico principal do paciente
+          description: Diagnóstico principal do paciente
           maxLength: 200
         associated_conditions:
           type: string
           nullable: true
-          title: Condições Associadas
-          description: Outras condições médicas ou comorbidades
-        allergies:
+          title: Comorbidades / Diagnósticos Secundários
+          description: Comorbidades ou diagnósticos secundários
+        responsible_contact:
           type: string
           nullable: true
-          title: Alergias
-          description: Alergias conhecidas do paciente
-        medications:
+          title: Contato do Responsável
+          description: Contato do responsável ou cuidador
+          maxLength: 200
+        reference_professional:
           type: string
           nullable: true
-          title: Medicações
-          description: Medicamentos em uso atual
-        communication_methods:
+          title: Profissional de Referência
+          description: Profissional de referência que acompanha o paciente
+          maxLength: 200
+        cognitive_level:
           type: string
           nullable: true
-          title: Formas de Comunicação
-          description: Métodos de comunicação utilizados pelo paciente
-        spoken_words:
+          title: Nível Cognitivo
+          description: Nível cognitivo estimado do paciente
+          maxLength: 100
+        auditory_comprehension:
           type: string
           nullable: true
-          title: Palavras Faladas
-          description: Palavras que o paciente consegue falar ou entender
-        preferred_pictograms:
+          title: Compreensão Auditiva
+          description: Compreensão auditiva de palavras, frases ou comandos
+          maxLength: 150
+        memory_profile:
           type: string
           nullable: true
-          title: Pictogramas Preferidos
-          description: Pictogramas ou símbolos preferidos pelo paciente
-        dietary_restrictions:
+          title: Memória
+          description: Perfil de memória visual e/ou auditiva
+          maxLength: 150
+        attention_duration:
           type: string
           nullable: true
-          title: Restrições Alimentares
-          description: Alimentos que devem ser evitados ou restrições específicas
-        food_preferences:
+          title: Atenção / Concentração
+          description: Tempo ou nível de atenção/concentração
+          maxLength: 100
+        learning_pace:
           type: string
           nullable: true
-          title: Preferências Alimentares
-          description: Alimentos favoritos ou preferências do paciente
-        feeding_difficulties:
+          title: Capacidade de Aprendizado
+          description: Velocidade ou facilidade de aprendizado
+          maxLength: 100
+        language_style:
           type: string
           nullable: true
-          title: Dificuldades na Alimentação
-          description: Problemas ou dificuldades relacionadas à alimentação
-        needs_expression:
+          title: Linguagem Literal ou Figurada
+          description: Se a compreensão é mais literal, figurada ou ambas
+          maxLength: 50
+        functional_speech:
           type: string
           nullable: true
-          title: Expressão de Necessidades
-          description: Como o paciente expressa suas necessidades e desejos
-        frustration_reactions:
+          title: Possui Fala Funcional
+          description: 'Se possui fala funcional: não, parcial ou completa'
+          maxLength: 100
+        speech_intelligibility:
           type: string
           nullable: true
-          title: Reações à Frustração
-          description: Como o paciente reage quando frustrado ou irritado
-        general_observations:
+          title: Inteligibilidade de Fala
+          description: Nível de inteligibilidade da fala
+          maxLength: 100
+        uses_gestures:
+          type: boolean
+          nullable: true
+          title: Usa Gestos
+          description: Indica se o paciente utiliza gestos naturais
+        uses_signs:
+          type: boolean
+          nullable: true
+          title: Usa Sinais
+          description: Indica se o paciente utiliza sinais/Libras
+        uses_images_or_symbols:
+          type: boolean
+          nullable: true
+          title: Usa Imagens ou Símbolos
+          description: Indica se o paciente utiliza imagens, figuras ou símbolos
+        preferred_symbol_systems:
           type: string
           nullable: true
-          title: Observações Gerais
-          description: Observações adicionais importantes sobre o paciente
+          title: Sistemas de Símbolos Preferidos
+          description: Sistemas de símbolos preferidos, como Arasaac ou fotografias
+        symbol_comprehension:
+          type: string
+          nullable: true
+          title: Compreensão de Símbolos
+          description: Nível de compreensão dos símbolos apresentados
+          maxLength: 100
+        communication_priorities:
+          type: string
+          nullable: true
+          title: Necessidades Comunicativas Principais
+          description: Principais necessidades comunicativas do paciente
         is_active:
           type: boolean
           title: Ativo
@@ -2344,8 +2547,20 @@ components:
           type: string
           nullable: true
           title: Diagnóstico Principal
-          description: Diagnóstico médico principal do paciente
+          description: Diagnóstico principal do paciente
           maxLength: 200
+        cognitive_level:
+          type: string
+          nullable: true
+          title: Nível Cognitivo
+          description: Nível cognitivo estimado do paciente
+          maxLength: 100
+        functional_speech:
+          type: string
+          nullable: true
+          title: Possui Fala Funcional
+          description: 'Ex.: não, sim parcial ou sim completa'
+          maxLength: 100
         is_active:
           type: boolean
           title: Ativo
@@ -2384,68 +2599,104 @@ components:
           type: string
           nullable: true
           title: Diagnóstico Principal
-          description: Diagnóstico médico principal do paciente
+          description: Diagnóstico principal do paciente
           maxLength: 200
         associated_conditions:
           type: string
           nullable: true
-          title: Condições Associadas
-          description: Outras condições médicas ou comorbidades
-        allergies:
+          title: Comorbidades / Diagnósticos Secundários
+          description: Comorbidades ou diagnósticos secundários
+        responsible_contact:
           type: string
           nullable: true
-          title: Alergias
-          description: Alergias conhecidas do paciente
-        medications:
+          title: Contato do Responsável
+          description: Contato do responsável ou cuidador
+          maxLength: 200
+        reference_professional:
           type: string
           nullable: true
-          title: Medicações
-          description: Medicamentos em uso atual
-        communication_methods:
+          title: Profissional de Referência
+          description: Profissional de referência que acompanha o paciente
+          maxLength: 200
+        cognitive_level:
           type: string
           nullable: true
-          title: Formas de Comunicação
-          description: Métodos de comunicação utilizados pelo paciente
-        spoken_words:
+          title: Nível Cognitivo
+          description: Nível cognitivo estimado do paciente
+          maxLength: 100
+        auditory_comprehension:
           type: string
           nullable: true
-          title: Palavras Faladas
-          description: Palavras que o paciente consegue falar ou entender
-        preferred_pictograms:
+          title: Compreensão Auditiva
+          description: Compreensão auditiva de palavras, frases ou comandos
+          maxLength: 150
+        memory_profile:
           type: string
           nullable: true
-          title: Pictogramas Preferidos
-          description: Pictogramas ou símbolos preferidos pelo paciente
-        dietary_restrictions:
+          title: Memória
+          description: Perfil de memória visual e/ou auditiva
+          maxLength: 150
+        attention_duration:
           type: string
           nullable: true
-          title: Restrições Alimentares
-          description: Alimentos que devem ser evitados ou restrições específicas
-        food_preferences:
+          title: Atenção / Concentração
+          description: Tempo ou nível de atenção/concentração
+          maxLength: 100
+        learning_pace:
           type: string
           nullable: true
-          title: Preferências Alimentares
-          description: Alimentos favoritos ou preferências do paciente
-        feeding_difficulties:
+          title: Capacidade de Aprendizado
+          description: Velocidade ou facilidade de aprendizado
+          maxLength: 100
+        language_style:
           type: string
           nullable: true
-          title: Dificuldades na Alimentação
-          description: Problemas ou dificuldades relacionadas à alimentação
-        needs_expression:
+          title: Linguagem Literal ou Figurada
+          description: Se a compreensão é mais literal, figurada ou ambas
+          maxLength: 50
+        functional_speech:
           type: string
           nullable: true
-          title: Expressão de Necessidades
-          description: Como o paciente expressa suas necessidades e desejos
-        frustration_reactions:
+          title: Possui Fala Funcional
+          description: 'Se possui fala funcional: não, parcial ou completa'
+          maxLength: 100
+        speech_intelligibility:
           type: string
           nullable: true
-          title: Reações à Frustração
-          description: Como o paciente reage quando frustrado ou irritado
-        general_observations:
+          title: Inteligibilidade de Fala
+          description: Nível de inteligibilidade da fala
+          maxLength: 100
+        uses_gestures:
+          type: boolean
+          nullable: true
+          title: Usa Gestos
+          description: Indica se o paciente utiliza gestos naturais
+        uses_signs:
+          type: boolean
+          nullable: true
+          title: Usa Sinais
+          description: Indica se o paciente utiliza sinais/Libras
+        uses_images_or_symbols:
+          type: boolean
+          nullable: true
+          title: Usa Imagens ou Símbolos
+          description: Indica se o paciente utiliza imagens, figuras ou símbolos
+        preferred_symbol_systems:
           type: string
           nullable: true
-          title: Observações Gerais
-          description: Observações adicionais importantes sobre o paciente
+          title: Sistemas de Símbolos Preferidos
+          description: Sistemas de símbolos preferidos, como Arasaac ou fotografias
+        symbol_comprehension:
+          type: string
+          nullable: true
+          title: Compreensão de Símbolos
+          description: Nível de compreensão dos símbolos apresentados
+          maxLength: 100
+        communication_priorities:
+          type: string
+          nullable: true
+          title: Necessidades Comunicativas Principais
+          description: Principais necessidades comunicativas do paciente
         is_active:
           type: boolean
           title: Ativo
@@ -2525,6 +2776,9 @@ components:
       - file
       - name
       - patient
+    BlankEnum:
+      enum:
+      - ''
     Caregiver:
       type: object
       description: Serializer para Cuidador
@@ -2552,6 +2806,24 @@ components:
           title: Contato
           description: Telefone de contato do cuidador
           maxLength: 20
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: Data de Nascimento
+          description: Data de nascimento da pessoa (opcional)
+        gender:
+          nullable: true
+          title: Gênero
+          description: |-
+            Gênero informado no cadastro (opcional): Masculino ou Feminino
+
+            * `Masculino` - Masculino
+            * `Feminino` - Feminino
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         profession:
           type: string
           nullable: true
@@ -2657,13 +2929,25 @@ components:
           type: string
           nullable: true
           title: Diagnóstico Principal
-          description: Diagnóstico médico principal do paciente
+          description: Diagnóstico principal do paciente
           maxLength: 200
         associated_conditions:
           type: string
           nullable: true
-          title: Condições Associadas
-          description: Outras condições médicas ou comorbidades
+          title: Comorbidades / Diagnósticos Secundários
+          description: Comorbidades ou diagnósticos secundários relacionados ao paciente
+        cognitive_level:
+          type: string
+          nullable: true
+          title: Nível Cognitivo
+          description: Nível cognitivo estimado do paciente
+          maxLength: 100
+        functional_speech:
+          type: string
+          nullable: true
+          title: Possui Fala Funcional
+          description: 'Ex.: não, sim parcial ou sim completa'
+          maxLength: 100
         is_active:
           type: boolean
           title: Ativo
@@ -2766,6 +3050,24 @@ components:
           title: Contato
           description: Telefone de contato do cuidador
           maxLength: 20
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: Data de Nascimento
+          description: Data de nascimento da pessoa (opcional)
+        gender:
+          nullable: true
+          title: Gênero
+          description: |-
+            Gênero informado no cadastro (opcional): Masculino ou Feminino
+
+            * `Masculino` - Masculino
+            * `Feminino` - Feminino
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         profession:
           type: string
           nullable: true
@@ -2918,6 +3220,14 @@ components:
           minLength: 1
       required:
       - email
+    GenderEnum:
+      enum:
+      - Masculino
+      - Feminino
+      type: string
+      description: |-
+        * `Masculino` - Masculino
+        * `Feminino` - Feminino
     History:
       type: object
       properties:
@@ -3008,6 +3318,9 @@ components:
       - caregiver
       - description
       - patient
+    NullEnum:
+      enum:
+      - null
     PaginatedAnamnesisList:
       type: object
       required:
@@ -3301,68 +3614,104 @@ components:
           type: string
           nullable: true
           title: Diagnóstico Principal
-          description: Diagnóstico médico principal do paciente
+          description: Diagnóstico principal do paciente
           maxLength: 200
         associated_conditions:
           type: string
           nullable: true
-          title: Condições Associadas
-          description: Outras condições médicas ou comorbidades
-        allergies:
+          title: Comorbidades / Diagnósticos Secundários
+          description: Comorbidades ou diagnósticos secundários
+        responsible_contact:
           type: string
           nullable: true
-          title: Alergias
-          description: Alergias conhecidas do paciente
-        medications:
+          title: Contato do Responsável
+          description: Contato do responsável ou cuidador
+          maxLength: 200
+        reference_professional:
           type: string
           nullable: true
-          title: Medicações
-          description: Medicamentos em uso atual
-        communication_methods:
+          title: Profissional de Referência
+          description: Profissional de referência que acompanha o paciente
+          maxLength: 200
+        cognitive_level:
           type: string
           nullable: true
-          title: Formas de Comunicação
-          description: Métodos de comunicação utilizados pelo paciente
-        spoken_words:
+          title: Nível Cognitivo
+          description: Nível cognitivo estimado do paciente
+          maxLength: 100
+        auditory_comprehension:
           type: string
           nullable: true
-          title: Palavras Faladas
-          description: Palavras que o paciente consegue falar ou entender
-        preferred_pictograms:
+          title: Compreensão Auditiva
+          description: Compreensão auditiva de palavras, frases ou comandos
+          maxLength: 150
+        memory_profile:
           type: string
           nullable: true
-          title: Pictogramas Preferidos
-          description: Pictogramas ou símbolos preferidos pelo paciente
-        dietary_restrictions:
+          title: Memória
+          description: Perfil de memória visual e/ou auditiva
+          maxLength: 150
+        attention_duration:
           type: string
           nullable: true
-          title: Restrições Alimentares
-          description: Alimentos que devem ser evitados ou restrições específicas
-        food_preferences:
+          title: Atenção / Concentração
+          description: Tempo ou nível de atenção/concentração
+          maxLength: 100
+        learning_pace:
           type: string
           nullable: true
-          title: Preferências Alimentares
-          description: Alimentos favoritos ou preferências do paciente
-        feeding_difficulties:
+          title: Capacidade de Aprendizado
+          description: Velocidade ou facilidade de aprendizado
+          maxLength: 100
+        language_style:
           type: string
           nullable: true
-          title: Dificuldades na Alimentação
-          description: Problemas ou dificuldades relacionadas à alimentação
-        needs_expression:
+          title: Linguagem Literal ou Figurada
+          description: Se a compreensão é mais literal, figurada ou ambas
+          maxLength: 50
+        functional_speech:
           type: string
           nullable: true
-          title: Expressão de Necessidades
-          description: Como o paciente expressa suas necessidades e desejos
-        frustration_reactions:
+          title: Possui Fala Funcional
+          description: 'Se possui fala funcional: não, parcial ou completa'
+          maxLength: 100
+        speech_intelligibility:
           type: string
           nullable: true
-          title: Reações à Frustração
-          description: Como o paciente reage quando frustrado ou irritado
-        general_observations:
+          title: Inteligibilidade de Fala
+          description: Nível de inteligibilidade da fala
+          maxLength: 100
+        uses_gestures:
+          type: boolean
+          nullable: true
+          title: Usa Gestos
+          description: Indica se o paciente utiliza gestos naturais
+        uses_signs:
+          type: boolean
+          nullable: true
+          title: Usa Sinais
+          description: Indica se o paciente utiliza sinais/Libras
+        uses_images_or_symbols:
+          type: boolean
+          nullable: true
+          title: Usa Imagens ou Símbolos
+          description: Indica se o paciente utiliza imagens, figuras ou símbolos
+        preferred_symbol_systems:
           type: string
           nullable: true
-          title: Observações Gerais
-          description: Observações adicionais importantes sobre o paciente
+          title: Sistemas de Símbolos Preferidos
+          description: Sistemas de símbolos preferidos, como Arasaac ou fotografias
+        symbol_comprehension:
+          type: string
+          nullable: true
+          title: Compreensão de Símbolos
+          description: Nível de compreensão dos símbolos apresentados
+          maxLength: 100
+        communication_priorities:
+          type: string
+          nullable: true
+          title: Necessidades Comunicativas Principais
+          description: Principais necessidades comunicativas do paciente
         is_active:
           type: boolean
           title: Ativo
@@ -3418,6 +3767,24 @@ components:
           title: Contato
           description: Telefone de contato do cuidador
           maxLength: 20
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: Data de Nascimento
+          description: Data de nascimento da pessoa (opcional)
+        gender:
+          nullable: true
+          title: Gênero
+          description: |-
+            Gênero informado no cadastro (opcional): Masculino ou Feminino
+
+            * `Masculino` - Masculino
+            * `Feminino` - Feminino
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         profession:
           type: string
           nullable: true
@@ -3576,6 +3943,24 @@ components:
           title: Contato
           description: Telefone de contato do paciente
           maxLength: 20
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: Data de Nascimento
+          description: Data de nascimento do paciente (opcional)
+        gender:
+          nullable: true
+          title: Gênero
+          description: |-
+            Gênero informado no cadastro do paciente (opcional): Masculino ou Feminino
+
+            * `Masculino` - Masculino
+            * `Feminino` - Feminino
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         cid:
           type: string
           nullable: true
@@ -3719,6 +4104,24 @@ components:
           title: Contato
           description: Telefone de contato do paciente
           maxLength: 20
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: Data de Nascimento
+          description: Data de nascimento do paciente (opcional)
+        gender:
+          nullable: true
+          title: Gênero
+          description: |-
+            Gênero informado no cadastro do paciente (opcional): Masculino ou Feminino
+
+            * `Masculino` - Masculino
+            * `Feminino` - Feminino
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         cid:
           type: string
           nullable: true
@@ -4205,6 +4608,24 @@ components:
           title: Contato
           description: Telefone de contato do paciente
           maxLength: 20
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: Data de Nascimento
+          description: Data de nascimento do paciente (opcional)
+        gender:
+          nullable: true
+          title: Gênero
+          description: |-
+            Gênero informado no cadastro do paciente (opcional): Masculino ou Feminino
+
+            * `Masculino` - Masculino
+            * `Feminino` - Feminino
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         cid:
           type: string
           nullable: true
@@ -4326,6 +4747,24 @@ components:
           title: Contato
           description: Número de telefone ou celular
           maxLength: 20
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          title: Data de Nascimento
+          description: Data de nascimento da pessoa
+        gender:
+          nullable: true
+          title: Gênero
+          description: |-
+            Gênero informado no cadastro: Masculino ou Feminino
+
+            * `Masculino` - Masculino
+            * `Feminino` - Feminino
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         cid:
           type: string
           nullable: true
