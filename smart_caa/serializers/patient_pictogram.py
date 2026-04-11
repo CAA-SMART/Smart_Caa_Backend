@@ -1,6 +1,35 @@
+from django.utils import timezone
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from ..models import EverydayCategory, PatientPictogram, Person, Pictogram
+
+
+def _reactivate_or_create_patient_pictogram(patient, pictogram, created_by=None):
+    existing_link = PatientPictogram.objects.filter(
+        patient=patient,
+        pictogram=pictogram,
+    ).order_by('-created_at', '-id').first()
+
+    if existing_link is not None:
+        if not existing_link.is_active:
+            existing_link.is_active = True
+            existing_link.inactivated_at = None
+            existing_link.inactivated_by = None
+
+            update_fields = ['is_active', 'inactivated_at', 'inactivated_by', 'updated_at']
+            if existing_link.created_by_id is None and created_by is not None:
+                existing_link.created_by = created_by
+                update_fields.append('created_by')
+
+            existing_link.save(update_fields=update_fields)
+
+        return existing_link
+
+    return PatientPictogram.objects.create(
+        patient=patient,
+        pictogram=pictogram,
+        created_by=created_by,
+    )
 
 
 class PatientPictogramSerializer(serializers.ModelSerializer):
@@ -72,13 +101,17 @@ class PatientPictogramCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """
-        Cria a vinculação do pictograma ao paciente
+        Cria a vinculação do pictograma ao paciente ou reativa um vínculo inativo existente.
         """
-        # Define o created_by se disponível no contexto
+        created_by = None
         if 'request' in self.context:
-            validated_data['created_by'] = self.context['request'].user
-        
-        return super().create(validated_data)
+            created_by = self.context['request'].user
+
+        return _reactivate_or_create_patient_pictogram(
+            patient=validated_data['patient'],
+            pictogram=validated_data['pictogram'],
+            created_by=created_by,
+        )
 
 
 class PatientCustomPictogramCreateSerializer(serializers.Serializer):
@@ -230,24 +263,89 @@ class PatientPictogramBatchCreateSerializer(serializers.Serializer):
     def create(self, validated_data):
         """
         Cria múltiplas vinculações de pictogramas ao paciente
+        ou reativa vínculos inativos existentes.
         """
         patient = validated_data['patient']
         pictograms = validated_data['pictograms']
         created_by = None
-        
+
         if 'request' in self.context:
             created_by = self.context['request'].user
-        
+
         created_links = []
         for pictogram in pictograms:
-            link = PatientPictogram.objects.create(
+            link = _reactivate_or_create_patient_pictogram(
                 patient=patient,
                 pictogram=pictogram,
-                created_by=created_by
+                created_by=created_by,
             )
             created_links.append(link)
-        
+
         return created_links
+
+
+class PatientPictogramDestroySerializer(serializers.Serializer):
+    """
+    Serializer para desvincular um ou múltiplos pictogramas de um paciente,
+    sem remover o histórico da tabela de vinculação.
+    """
+    pictograms = serializers.ListField(
+        child=serializers.IntegerField(),
+        help_text="Lista de IDs dos pictogramas a serem desvinculados",
+        allow_empty=False
+    )
+
+    def validate_pictograms(self, value):
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError(
+                "A lista contém pictogramas duplicados."
+            )
+        return value
+
+    def validate(self, attrs):
+        patient_id = self.context.get('patient_id')
+        if not patient_id:
+            raise serializers.ValidationError("ID do paciente não fornecido.")
+
+        try:
+            patient = Person.objects.get(id=patient_id, is_patient=True, is_active=True)
+        except Person.DoesNotExist:
+            raise serializers.ValidationError("Paciente não encontrado.")
+
+        pictogram_ids = attrs.get('pictograms', [])
+        active_links = list(
+            PatientPictogram.objects.filter(
+                patient=patient,
+                pictogram_id__in=pictogram_ids,
+                is_active=True
+            ).select_related('pictogram')
+        )
+
+        active_ids = {link.pictogram_id for link in active_links}
+        missing_ids = [pid for pid in pictogram_ids if pid not in active_ids]
+
+        if missing_ids:
+            raise serializers.ValidationError(
+                f"Os seguintes pictogramas não estão vinculados ou já estão inativos para este paciente: {missing_ids}"
+            )
+
+        attrs['patient'] = patient
+        attrs['links'] = active_links
+        return attrs
+
+    def create(self, validated_data):
+        links = validated_data['links']
+        request = self.context.get('request')
+        inactivated_by = request.user if request and request.user.is_authenticated else None
+        inactivated_at = timezone.now()
+
+        for link in links:
+            link.is_active = False
+            link.inactivated_by = inactivated_by
+            link.inactivated_at = inactivated_at
+            link.save(update_fields=['is_active', 'inactivated_by', 'inactivated_at', 'updated_at'])
+
+        return links
 
 
 class PictogramForPatientSerializer(serializers.ModelSerializer):

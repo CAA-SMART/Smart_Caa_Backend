@@ -12,6 +12,7 @@ from .patient_pictogram import (
     PatientPictogramCreateSerializer,
     PatientCustomPictogramCreateSerializer,
     PatientPictogramBatchCreateSerializer,
+    PatientPictogramDestroySerializer,
     PictogramForPatientSerializer
 )
 from .anamnesis import (

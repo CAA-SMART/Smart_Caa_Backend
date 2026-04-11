@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import generics, serializers, status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -6,8 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
-from django.utils import timezone
-from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse, extend_schema
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    PolymorphicProxySerializer,
+    extend_schema,
+    inline_serializer,
+)
 from ..models import Person, PatientCaregiverRelationship, PatientPictogram, Pictogram
 from ..serializers import (
     PatientSerializer, 
@@ -17,6 +23,7 @@ from ..serializers import (
     PatientPictogramCreateSerializer,
     PatientCustomPictogramCreateSerializer,
     PatientPictogramBatchCreateSerializer,
+    PatientPictogramDestroySerializer,
     PictogramForPatientSerializer
 )
 
@@ -39,6 +46,39 @@ PATIENT_SWAGGER_EXAMPLE = OpenApiExample(
         'hobbies': 'Pintura, Xadrez'
     },
     request_only=True,
+)
+
+PATIENT_PICTOGRAM_SINGLE_REQUEST = inline_serializer(
+    name='PatientPictogramSingleRequest',
+    fields={
+        'pictogram': serializers.IntegerField(help_text='ID do pictograma para operação única')
+    },
+)
+
+PATIENT_PICTOGRAM_BATCH_REQUEST = inline_serializer(
+    name='PatientPictogramBatchRequest',
+    fields={
+        'pictograms': serializers.ListField(
+            child=serializers.IntegerField(),
+            help_text='Lista de IDs dos pictogramas para operação em lote'
+        )
+    },
+)
+
+PATIENT_PICTOGRAM_SINGLE_RESPONSE = inline_serializer(
+    name='PatientPictogramSingleResponse',
+    fields={
+        'message': serializers.CharField(),
+        'data': PatientPictogramSerializer(),
+    },
+)
+
+PATIENT_PICTOGRAM_BATCH_RESPONSE = inline_serializer(
+    name='PatientPictogramBatchResponse',
+    fields={
+        'message': serializers.CharField(),
+        'data': PatientPictogramSerializer(many=True),
+    },
 )
 
 
@@ -292,35 +332,87 @@ class PatientPictogramCreateView(APIView):
     
     @extend_schema(
         summary='Vincular Pictograma(s) ao Paciente',
-        description='Utilizado para criar vínculo(s) entre um paciente e pictograma(s). Para múltiplos pictogramas, envie um array no campo "pictograms".',
-        request={
-            'application/json': {
-                'oneOf': [
-                    {
-                        'type': 'object',
-                        'properties': {
-                            'pictogram': {'type': 'integer', 'description': 'ID do pictograma (para vínculo único)'}
-                        },
-                        'required': ['pictogram']
-                    },
-                    {
-                        'type': 'object', 
-                        'properties': {
-                            'pictograms': {
-                                'type': 'array',
-                                'items': {'type': 'integer'},
-                                'description': 'Array de IDs dos pictogramas (para múltiplos vínculos)'
-                            }
-                        },
-                        'required': ['pictograms']
-                    }
-                ]
-            }
-        },
+        description='Cria um ou múltiplos vínculos entre um paciente e pictogramas. Se já existir vínculo inativo, ele será reativado automaticamente. **Exemplo:** `{ "pictogram": 1 }` ou `{ "pictograms": [1, 2, 3] }`.',
+        request=PolymorphicProxySerializer(
+            component_name='PatientPictogramCreateRequest',
+            serializers=[
+                PATIENT_PICTOGRAM_SINGLE_REQUEST,
+                PATIENT_PICTOGRAM_BATCH_REQUEST,
+            ],
+            resource_type_field_name=None,
+        ),
         responses={
-            201: PatientPictogramSerializer(many=True),
+            201: OpenApiResponse(
+                response=PolymorphicProxySerializer(
+                    component_name='PatientPictogramCreateResponse',
+                    serializers=[
+                        PATIENT_PICTOGRAM_SINGLE_RESPONSE,
+                        PATIENT_PICTOGRAM_BATCH_RESPONSE,
+                    ],
+                    resource_type_field_name=None,
+                ),
+                description='Pictograma(s) vinculado(s) com sucesso.'
+            ),
             400: OpenApiResponse(description='Dados inválidos')
-        }
+        },
+        examples=[
+            OpenApiExample(
+                'Vínculo único',
+                summary='Payload para vincular um pictograma',
+                value={'pictogram': 1},
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Vínculo em lote',
+                summary='Payload para vincular vários pictogramas',
+                value={'pictograms': [1, 2, 3]},
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Resposta vínculo único',
+                value={
+                    'message': 'Pictograma vinculado com sucesso.',
+                    'data': {
+                        'id': 10,
+                        'pictogram': 1,
+                        'pictogram_name': 'Água',
+                        'pictogram_category': 'Rotina',
+                        'pictogram_image_url': 'http://localhost:8000/media/pictograms/images/agua.png',
+                        'pictogram_audio_url': None,
+                        'pictogram_description': 'Beber água',
+                        'is_active': True,
+                        'created_at': '2026-04-11T10:00:00Z',
+                        'created_by': 1,
+                        'created_by_username': 'tester'
+                    }
+                },
+                response_only=True,
+                status_codes=['201'],
+            ),
+            OpenApiExample(
+                'Resposta vínculo em lote',
+                value={
+                    'message': '3 pictogramas vinculados com sucesso.',
+                    'data': [
+                        {
+                            'id': 10,
+                            'pictogram': 1,
+                            'pictogram_name': 'Água',
+                            'pictogram_category': 'Rotina',
+                            'pictogram_image_url': 'http://localhost:8000/media/pictograms/images/agua.png',
+                            'pictogram_audio_url': None,
+                            'pictogram_description': 'Beber água',
+                            'is_active': True,
+                            'created_at': '2026-04-11T10:00:00Z',
+                            'created_by': 1,
+                            'created_by_username': 'tester'
+                        }
+                    ]
+                },
+                response_only=True,
+                status_codes=['201'],
+            ),
+        ]
     )
     def post(self, request, *args, **kwargs):
         patient_id = self.kwargs['patient_id']
@@ -400,7 +492,10 @@ class PatientCustomPictogramCreateView(APIView):
         description='Cria um pictograma privado e já o vincula ao paciente em uma única operação. Se qualquer etapa falhar, nada é salvo.',
         request=PatientCustomPictogramCreateSerializer,
         responses={
-            201: PatientPictogramSerializer,
+            201: OpenApiResponse(
+                response=PATIENT_PICTOGRAM_SINGLE_RESPONSE,
+                description='Pictograma personalizado criado e vinculado com sucesso.'
+            ),
             400: OpenApiResponse(description='Dados inválidos')
         }
     )
@@ -444,34 +539,156 @@ class PatientCustomPictogramCreateView(APIView):
         )
 
 
-class PatientPictogramDestroyView(generics.DestroyAPIView):
+@extend_schema(tags=['Patient'])
+class PatientPictogramDestroyView(APIView):
     """
-    View para desvincular um pictograma de um paciente (inativar)
+    View para desvincular um ou múltiplos pictogramas de um paciente,
+    marcando os vínculos como inativos.
     """
-    serializer_class = PatientPictogramSerializer
     permission_classes = (IsAuthenticated,)
-    
-    def get_queryset(self):
-        patient_id = self.kwargs['patient_id']
-        return PatientPictogram.objects.filter(
-            patient_id=patient_id,
-            is_active=True
-        )
-    
+
     @extend_schema(
-        summary='Desvincular Pictograma do Paciente',
-        description='Utilizado para desvincular um pictograma de um paciente (marca como inativo)'
+        summary='Desvincular Pictograma(s) do Paciente',
+        description='Inativa um ou múltiplos vínculos entre um paciente e pictogramas. Os registros não são apagados da tabela. **Exemplo:** `{ "pictogram": 1 }` ou `{ "pictograms": [1, 2, 3] }`.',
+        request=PolymorphicProxySerializer(
+            component_name='PatientPictogramDestroyRequest',
+            serializers=[
+                PATIENT_PICTOGRAM_SINGLE_REQUEST,
+                PATIENT_PICTOGRAM_BATCH_REQUEST,
+            ],
+            resource_type_field_name=None,
+        ),
+        responses={
+            200: OpenApiResponse(
+                response=PolymorphicProxySerializer(
+                    component_name='PatientPictogramDestroyResponse',
+                    serializers=[
+                        PATIENT_PICTOGRAM_SINGLE_RESPONSE,
+                        PATIENT_PICTOGRAM_BATCH_RESPONSE,
+                    ],
+                    resource_type_field_name=None,
+                ),
+                description='Pictograma(s) desvinculado(s) com sucesso.'
+            ),
+            400: OpenApiResponse(description='Dados inválidos')
+        },
+        examples=[
+            OpenApiExample(
+                'Desvinculação única',
+                summary='Payload para desvincular um pictograma',
+                value={'pictogram': 1},
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Desvinculação em lote',
+                summary='Payload para desvincular vários pictogramas',
+                value={'pictograms': [1, 2, 3]},
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Resposta desvinculação única',
+                value={
+                    'message': 'Pictograma desvinculado com sucesso.',
+                    'data': {
+                        'id': 10,
+                        'pictogram': 1,
+                        'pictogram_name': 'Água',
+                        'pictogram_category': 'Rotina',
+                        'pictogram_image_url': 'http://localhost:8000/media/pictograms/images/agua.png',
+                        'pictogram_audio_url': None,
+                        'pictogram_description': 'Beber água',
+                        'is_active': False,
+                        'created_at': '2026-04-11T10:00:00Z',
+                        'created_by': 1,
+                        'created_by_username': 'tester'
+                    }
+                },
+                response_only=True,
+                status_codes=['200'],
+            ),
+            OpenApiExample(
+                'Resposta desvinculação em lote',
+                value={
+                    'message': '3 pictogramas desvinculados com sucesso.',
+                    'data': [
+                        {
+                            'id': 10,
+                            'pictogram': 1,
+                            'pictogram_name': 'Água',
+                            'pictogram_category': 'Rotina',
+                            'pictogram_image_url': 'http://localhost:8000/media/pictograms/images/agua.png',
+                            'pictogram_audio_url': None,
+                            'pictogram_description': 'Beber água',
+                            'is_active': False,
+                            'created_at': '2026-04-11T10:00:00Z',
+                            'created_by': 1,
+                            'created_by_username': 'tester'
+                        }
+                    ]
+                },
+                response_only=True,
+                status_codes=['200'],
+            ),
+        ]
     )
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        
-        # Ao invés de deletar, marca como inativo
-        instance.is_active = False
-        instance.inactivated_by = request.user
-        instance.inactivated_at = timezone.now()
-        instance.save()
-        
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def post(self, request, *args, **kwargs):
+        patient_id = self.kwargs['patient_id']
+
+        if 'pictograms' in request.data:
+            serializer = PatientPictogramDestroySerializer(
+                data=request.data,
+                context={'request': request, 'patient_id': patient_id}
+            )
+
+            if serializer.is_valid():
+                with transaction.atomic():
+                    inactivated_links = serializer.save()
+
+                response_serializer = PatientPictogramSerializer(
+                    inactivated_links,
+                    many=True,
+                    context={'request': request}
+                )
+
+                return Response(
+                    {
+                        'message': f'{len(inactivated_links)} pictogramas desvinculados com sucesso.',
+                        'data': response_serializer.data
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'pictogram' in request.data:
+            serializer = PatientPictogramDestroySerializer(
+                data={'pictograms': [request.data.get('pictogram')]},
+                context={'request': request, 'patient_id': patient_id}
+            )
+
+            if serializer.is_valid():
+                with transaction.atomic():
+                    inactivated_links = serializer.save()
+
+                response_serializer = PatientPictogramSerializer(
+                    inactivated_links[0],
+                    context={'request': request}
+                )
+
+                return Response(
+                    {
+                        'message': 'Pictograma desvinculado com sucesso.',
+                        'data': response_serializer.data
+                    },
+                    status=status.HTTP_200_OK
+                )
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {'detail': 'Envie `pictogram` para desvinculação única ou `pictograms` para múltiplas desvinculações.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 @extend_schema(tags=['Patient'])

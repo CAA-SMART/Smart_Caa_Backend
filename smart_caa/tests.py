@@ -366,3 +366,222 @@ class PatientCustomPictogramCreateViewTests(APITestCase):
         self.assertEqual(len(public_response.data), 1)
         self.assertEqual(private_response.data[0]['pictogram_name'], 'Privado')
         self.assertEqual(public_response.data[0]['pictogram_name'], 'Publico')
+
+
+class PatientPictogramDestroyViewTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='unlinker', password='123456')
+        self.client.force_authenticate(user=self.user)
+
+        self.patient = Person.objects.create(
+            name='Paciente Desvinculação',
+            cpf='12345678903',
+            email='paciente.desvinculacao@example.com',
+            phone='11999990002',
+            is_patient=True,
+        )
+        self.category = EverydayCategory.objects.create(
+            name='Ações',
+            created_by=self.user,
+        )
+        self.url = reverse('patient-pictogram-destroy', kwargs={'patient_id': self.patient.id})
+
+    def _make_image(self, name='unlink.gif'):
+        return SimpleUploadedFile(
+            name,
+            (
+                b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00'
+                b'\xff\xff\xff!\xf9\x04\x01\x00\x00\x00\x00,\x00'
+                b'\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;'
+            ),
+            content_type='image/gif',
+        )
+
+    def _create_linked_pictogram(self, name):
+        pictogram = Pictogram.objects.create(
+            name=name,
+            category=self.category,
+            image=self._make_image(f'{name}.gif'),
+            private=False,
+            created_by=self.user,
+        )
+        link = PatientPictogram.objects.create(
+            patient=self.patient,
+            pictogram=pictogram,
+            created_by=self.user,
+        )
+        return pictogram, link
+
+    def test_destroy_inactivates_links_instead_of_deleting_rows(self):
+        first_pictogram, first_link = self._create_linked_pictogram('Comer')
+        second_pictogram, second_link = self._create_linked_pictogram('Beber')
+
+        response = self.client.post(
+            self.url,
+            {'pictograms': [first_pictogram.id, second_pictogram.id]},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        first_link.refresh_from_db()
+        second_link.refresh_from_db()
+
+        self.assertFalse(first_link.is_active)
+        self.assertFalse(second_link.is_active)
+        self.assertEqual(first_link.inactivated_by, self.user)
+        self.assertEqual(second_link.inactivated_by, self.user)
+        self.assertIsNotNone(first_link.inactivated_at)
+        self.assertIsNotNone(second_link.inactivated_at)
+        self.assertEqual(
+            PatientPictogram.objects.filter(
+                patient=self.patient,
+                pictogram__in=[first_pictogram, second_pictogram],
+            ).count(),
+            2,
+        )
+        self.assertEqual(response.data['message'], '2 pictogramas desvinculados com sucesso.')
+
+    def test_destroy_endpoint_also_accepts_single_pictogram_payload(self):
+        pictogram, link = self._create_linked_pictogram('Banheiro')
+
+        response = self.client.post(
+            self.url,
+            {'pictogram': pictogram.id},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'Pictograma desvinculado com sucesso.')
+
+        link.refresh_from_db()
+        self.assertFalse(link.is_active)
+        self.assertEqual(link.inactivated_by, self.user)
+
+    def test_destroy_is_atomic_when_any_pictogram_is_not_linked(self):
+        linked_pictogram, linked = self._create_linked_pictogram('Escovar')
+        unlinked_pictogram = Pictogram.objects.create(
+            name='Dormir',
+            category=self.category,
+            image=self._make_image('Dormir.gif'),
+            private=False,
+            created_by=self.user,
+        )
+
+        response = self.client.post(
+            self.url,
+            {'pictograms': [linked_pictogram.id, unlinked_pictogram.id]},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        linked.refresh_from_db()
+        self.assertTrue(linked.is_active)
+        self.assertIsNone(linked.inactivated_at)
+
+
+class PatientPictogramReactivationTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='reactivator', password='123456')
+        self.client.force_authenticate(user=self.user)
+
+        self.patient = Person.objects.create(
+            name='Paciente Reativação',
+            cpf='12345678904',
+            email='paciente.reativacao@example.com',
+            phone='11999990003',
+            is_patient=True,
+        )
+        self.category = EverydayCategory.objects.create(
+            name='Reativação',
+            created_by=self.user,
+        )
+        self.create_url = reverse('patient-pictogram-create', kwargs={'patient_id': self.patient.id})
+        self.destroy_url = reverse('patient-pictogram-destroy', kwargs={'patient_id': self.patient.id})
+
+    def _make_image(self, name='reactivate.gif'):
+        return SimpleUploadedFile(
+            name,
+            (
+                b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00'
+                b'\xff\xff\xff!\xf9\x04\x01\x00\x00\x00\x00,\x00'
+                b'\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;'
+            ),
+            content_type='image/gif',
+        )
+
+    def _create_linked_pictogram(self, name):
+        pictogram = Pictogram.objects.create(
+            name=name,
+            category=self.category,
+            image=self._make_image(f'{name}.gif'),
+            private=False,
+            created_by=self.user,
+        )
+        link = PatientPictogram.objects.create(
+            patient=self.patient,
+            pictogram=pictogram,
+            created_by=self.user,
+        )
+        return pictogram, link
+
+    def test_create_reactivates_existing_inactive_link_instead_of_creating_new_one(self):
+        pictogram, link = self._create_linked_pictogram('Lavar as mãos')
+
+        destroy_response = self.client.post(
+            self.destroy_url,
+            {'pictogram': pictogram.id},
+            format='json',
+        )
+        self.assertEqual(destroy_response.status_code, status.HTTP_200_OK)
+
+        response = self.client.post(
+            self.create_url,
+            {'pictogram': pictogram.id},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        link.refresh_from_db()
+        self.assertTrue(link.is_active)
+        self.assertIsNone(link.inactivated_at)
+        self.assertIsNone(link.inactivated_by)
+        self.assertEqual(
+            PatientPictogram.objects.filter(patient=self.patient, pictogram=pictogram).count(),
+            1,
+        )
+        self.assertEqual(response.data['data']['id'], link.id)
+
+    def test_batch_create_reactivates_existing_inactive_links(self):
+        first_pictogram, first_link = self._create_linked_pictogram('Pegar')
+        second_pictogram, second_link = self._create_linked_pictogram('Guardar')
+
+        destroy_response = self.client.post(
+            self.destroy_url,
+            {'pictograms': [first_pictogram.id, second_pictogram.id]},
+            format='json',
+        )
+        self.assertEqual(destroy_response.status_code, status.HTTP_200_OK)
+
+        response = self.client.post(
+            self.create_url,
+            {'pictograms': [first_pictogram.id, second_pictogram.id]},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        first_link.refresh_from_db()
+        second_link.refresh_from_db()
+
+        self.assertTrue(first_link.is_active)
+        self.assertTrue(second_link.is_active)
+        self.assertEqual(
+            PatientPictogram.objects.filter(
+                patient=self.patient,
+                pictogram__in=[first_pictogram, second_pictogram],
+            ).count(),
+            2,
+        )
